@@ -8,17 +8,17 @@ import (
 	"net/mail"
 	"time"
 	"todo-list/model"
-	result2 "todo-list/web/result"
+	"todo-list/web/result"
 )
 
-func signUp(c signUpCommand) *result2.ApiResult {
+func signUp(c signUpCommand) *result.ApiResult {
 	err := validateSignupRequest(c)
 	if err != nil {
-		return result2.BadRequest(err.Error())
+		return result.BadRequest(err.Error())
 	}
 	p, err := encryptPassword(c.Password)
 	if err != nil {
-		return result2.ServerError(err)
+		return result.ServerError(err)
 	}
 	user := new(model.User)
 	user.EmailAddress = c.EmailAddress
@@ -28,25 +28,25 @@ func signUp(c signUpCommand) *result2.ApiResult {
 
 	_, err = createUser(user)
 	if err != nil {
-		return result2.ServerError(err)
+		return result.ServerError(err)
 	}
-	return result2.Created()
+	return result.Created()
 }
 
-func login(ctx echo.Context, c logInCommand) *result2.ApiResult {
+func login(ctx echo.Context, c logInCommand) *result.ApiResult {
 	user, err := findUserByEmailAddress(c.EmailAddress)
 	if err != nil {
-		return result2.ServerError(err)
+		return result.ServerError(err)
 	}
 	if user == nil {
-		return result2.BadRequest("User not found for email - " + c.EmailAddress)
+		return result.BadRequest("User not found for email - " + c.EmailAddress)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.Password)); err != nil {
-		return result2.BadRequest("Password not matched")
+		return result.BadRequest("Password not matched")
 	}
 	token, err := createJwt(c.EmailAddress)
 	if err != nil {
-		return result2.ServerError(err)
+		return result.ServerError(err)
 	}
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
@@ -54,7 +54,7 @@ func login(ctx echo.Context, c logInCommand) *result2.ApiResult {
 	cookie.HttpOnly = true
 	//cookie.Secure = true
 	ctx.SetCookie(cookie)
-	return result2.Success("")
+	return result.Success("")
 }
 
 func encryptPassword(p string) (*string, error) {

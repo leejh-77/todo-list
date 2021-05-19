@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"todo-list/test"
-	result2 "todo-list/web/result"
+	"todo-list/web/result"
 )
 
 func init() {
@@ -97,7 +97,7 @@ func dummyContext() echo.Context {
 	return e.NewContext(req, rec)
 }
 
-func signUpTestUser(email string, password string, username string) *result2.ApiResult {
+func signUpTestUser(email string, password string, username string) *result.ApiResult {
 	c := signUpCommand{}
 	c.EmailAddress = email
 	c.Password = password

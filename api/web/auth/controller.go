@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/labstack/echo/v4"
-	result2 "todo-list/web/result"
+	"todo-list/web/result"
 )
 
 type signUpCommand struct {
@@ -29,7 +29,7 @@ func doLogin(ctx echo.Context) error {
 	return send(ctx, login(ctx, ctx.Get("command").(logInCommand)))
 }
 
-func send(ctx echo.Context, r *result2.ApiResult) error {
+func send(ctx echo.Context, r *result.ApiResult) error {
 	err := r.Error
 	if err != nil && err.Error != nil {
 		return err.Error
