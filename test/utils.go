@@ -2,6 +2,8 @@ package test
 
 import (
 	"log"
+	"strconv"
+	"time"
 	"todo-list/base"
 )
 
@@ -11,3 +13,8 @@ func TruncateTables() {
 		log.Fatal(err)
 	}
 }
+
+func UniqueString(str string) string {
+	return str + strconv.FormatInt(time.Now().UnixNano(), 10)
+}
+

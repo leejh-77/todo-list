@@ -5,11 +5,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"todo-list/constants"
+	"todo-list/test"
 )
 
 func TestSignup_valid(t *testing.T) {
 	c := SignUpCommand{}
-	c.EmailAddress = "jonghoon.lee@gmail.com"
+	c.EmailAddress = test.UniqueString("jonghoon.lee@gmail.com")
 	c.Password = "pasworkd@@#"
 	c.Username = "Jonghoon Lee"
 
@@ -48,7 +49,7 @@ func TestSignup_invalid_password(t *testing.T) {
 
 func TestSignUp_validate_jwt(t *testing.T) {
 	c := SignUpCommand{}
-	c.EmailAddress = "jonghoon.lee@gmail.com"
+	c.EmailAddress = test.UniqueString("jonghoon.lee@gmail.com")
 	c.Password = "password@!$"
 	c.Username = "Jonghoon Lee"
 
@@ -69,7 +70,7 @@ func TestSignUp_validate_jwt(t *testing.T) {
 }
 
 func TestSignUp_password_encrypt(t *testing.T) {
-	email := "jonghoon.lee@gmail.com"
+	email := test.UniqueString("jonghoon.lee@gmail.com")
 	password := "password@!@"
 
 	c := SignUpCommand{}

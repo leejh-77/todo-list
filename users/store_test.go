@@ -8,12 +8,10 @@ import (
 	"todo-list/test"
 )
 
-func init() {
-	test.TruncateTables()
-}
-
 func TestCreateUser(t *testing.T) {
-	id, err := createUserWithEmail("test.user@gmail.com")
+	email := test.UniqueString("test.user@gmail.com")
+
+	id, err := createUserWithEmail(email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,7 +19,8 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestFindByEmailAddress(t *testing.T) {
-	email := "test.user@gmail.com"
+	email := test.UniqueString("test.user@gmail.com")
+
 	id, err := createUserWithEmail(email)
 	if err != nil {
 		t.Fatal(err)
@@ -34,7 +33,9 @@ func TestFindByEmailAddress(t *testing.T) {
 }
 
 func TestFindById(t *testing.T) {
-	id, err := createUserWithEmail("test.user@gmail.com")
+	email := test.UniqueString("test.user@gmail.com")
+
+	id, err := createUserWithEmail(email)
 	if err != nil {
 		t.Fatal(err)
 	}
