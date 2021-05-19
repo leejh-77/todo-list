@@ -7,7 +7,7 @@ import (
 	"todo-list/base"
 )
 
-func TruncateTables() {
+func BeforeTest() {
 	_, err := base.DB.Exec("TRUNCATE TABLE users")
 	if err != nil {
 		log.Fatal(err)

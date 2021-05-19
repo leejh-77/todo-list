@@ -5,8 +5,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
-	"todo-list/auth"
-	"todo-list/constants"
+	"todo-list/base"
+	"todo-list/web/auth"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	auth.Init(e.Group("/"))
 
 	r := e.Group("api")
-	r.Use(middleware.JWT(constants.JWTSecret))
+	r.Use(middleware.JWT(base.JWTSecret))
 
 	err := e.Start(":9090")
 	if err != nil {

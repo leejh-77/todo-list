@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+const JWTSecret = "todo-list-jwt-secret"
+
 var DB *sql.DB
 
 func init() {
