@@ -6,7 +6,7 @@ import (
 	"todo-list/constants"
 )
 
-func CreateJwt(email string) (*string, error) {
+func createJwt(email string) (*string, error) {
 	c := jwt.MapClaims{}
 	c["exp"] = time.Now().Add(time.Hour).Unix()
 	c["email"] = email

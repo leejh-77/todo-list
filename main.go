@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
+	"todo-list/auth"
 	"todo-list/constants"
 )
 
@@ -14,6 +15,8 @@ func main() {
 	e.Use(middleware.Logger())
 
 	e.GET("/hello", helloWorld)
+
+	auth.Init(e.Group("/"))
 
 	r := e.Group("api")
 	r.Use(middleware.JWT(constants.JWTSecret))
