@@ -2,7 +2,6 @@ package users
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"net/mail"
 	"time"
@@ -16,7 +15,7 @@ type SignUpCommand struct {
 	Username string
 }
 
-func SignUp(cxt echo.Context, c SignUpCommand) (*string, error) {
+func SignUp(c SignUpCommand) (*string, error) {
 	err := validateSignupRequest(c)
 	if err != nil {
 		return nil, err
@@ -33,7 +32,7 @@ func SignUp(cxt echo.Context, c SignUpCommand) (*string, error) {
 	user.Username = c.Username
 	user.RegisteredTime = time.Now().Unix()
 
-	err = createUser(user)
+	_, err = createUser(user)
 	if err != nil {
 		return nil, err
 	}

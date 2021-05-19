@@ -5,19 +5,52 @@ import (
 	"testing"
 	"time"
 	"todo-list/model"
+	"todo-list/test"
 )
 
-func TestCreateUser(t *testing.T) {
-	user := new(model.User)
-	user.EmailAddress = "jonghoon.lee@gmail.com"
-	user.Password = "passwod@!!"
-	user.Username = "Jonghoon Lee"
-	user.RegisteredTime = time.Now().Unix()
+func init() {
+	test.TruncateTables()
+}
 
-	err := createUser(user)
+func TestCreateUser(t *testing.T) {
+	id, err := createUserWithEmail("test.user@gmail.com")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.NotEqual(t, int64(0), user.Id)
+	assert.NotEqual(t, int64(0), id)
+}
+
+func TestFindByEmailAddress(t *testing.T) {
+	email := "test.user@gmail.com"
+	id, err := createUserWithEmail(email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found, err := findUserByEmailAddress(email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, id, found.Id)
+}
+
+func TestFindById(t *testing.T) {
+	id, err := createUserWithEmail("test.user@gmail.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	user, err := findUserById(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.NotNil(t, user)
+}
+
+func createUserWithEmail(email string) (int64, error) {
+	user := new(model.User)
+	user.EmailAddress = email
+	user.Password = "passwod@!!"
+	user.Username = "Jonghoon Lee"
+	user.RegisteredTime = time.Now().Unix()
+	return createUser(user)
 }
 

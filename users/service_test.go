@@ -3,18 +3,9 @@ package users
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"testing"
 	"todo-list/constants"
-	"todo-list/store"
 )
-
-func init() {
-	_, err := store.DB.Exec("TRUNCATE TABLE users")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func TestSignup_valid(t *testing.T) {
 	c := SignUpCommand{}
