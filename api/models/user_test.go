@@ -1,10 +1,9 @@
-package auth
+package models
 
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-	"todo-list/model"
 	"todo-list/test"
 )
 
@@ -29,7 +28,7 @@ func TestFindByEmailAddress(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	found, err := findUserByEmailAddress(email)
+	found, err := FindUserByEmailAddress(email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +42,7 @@ func TestFindById(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	user, err := findUserById(id)
+	user, err := FindUserById(id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,11 +50,11 @@ func TestFindById(t *testing.T) {
 }
 
 func createUserWithEmail(email string) (int64, error) {
-	user := new(model.User)
+	user := new(User)
 	user.EmailAddress = email
 	user.Password = "passwod@!!"
 	user.Username = "Jonghoon Lee"
 	user.RegisteredTime = time.Now().Unix()
-	return createUser(user)
+	return CreateUser(user)
 }
 

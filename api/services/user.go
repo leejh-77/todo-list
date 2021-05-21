@@ -1,4 +1,4 @@
-package auth
+package services
 
 import (
 	"errors"
@@ -7,11 +7,24 @@ import (
 	"net/http"
 	"net/mail"
 	"time"
-	"todo-list/model"
-	"todo-list/web/result"
+	"todo-list/models"
+	"todo-list/result"
 )
 
-func signUp(c signUpCommand) *result.ApiResult {
+type SignUpCommand struct {
+	EmailAddress string `json:"emailAddress"`
+	Password     string `json:"password"`
+	Username     string `json:"username"`
+}
+
+type LogInCommand struct {
+	EmailAddress string `json:"emailAddress"`
+	Password     string `json:"password"`
+}
+
+func SignUp(ctx echo.Context) *result.ApiResult {
+	c := ctx.Get("command").(SignUpCommand)
+
 	err := validateSignupRequest(c)
 	if err != nil {
 		return result.BadRequest(err.Error())
@@ -20,21 +33,23 @@ func signUp(c signUpCommand) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
-	user := new(model.User)
+	user := new(models.User)
 	user.EmailAddress = c.EmailAddress
 	user.Password = *p
 	user.Username = c.Username
 	user.RegisteredTime = time.Now().Unix()
 
-	_, err = createUser(user)
+	_, err = models.CreateUser(user)
 	if err != nil {
 		return result.ServerError(err)
 	}
 	return result.Created()
 }
 
-func login(ctx echo.Context, c logInCommand) *result.ApiResult {
-	user, err := findUserByEmailAddress(c.EmailAddress)
+func LogIn(ctx echo.Context) *result.ApiResult {
+	c := ctx.Get("command").(LogInCommand)
+
+	user, err := models.FindUserByEmailAddress(c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -66,7 +81,7 @@ func encryptPassword(p string) (*string, error) {
 	return &s, nil
 }
 
-func validateSignupRequest(c signUpCommand) error {
+func validateSignupRequest(c SignUpCommand) error {
 	email := c.EmailAddress
 	_, err := mail.ParseAddress(email)
 	if err != nil {

@@ -1,11 +1,10 @@
-package todo
+package models
 
 import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"todo-list/base"
-	"todo-list/model"
 	"todo-list/test"
 )
 
@@ -22,7 +21,7 @@ func TestFindAll(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	todos, err := findAll()
+	todos, err := FindAll()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,18 +48,18 @@ func TestComplete(t *testing.T) {
 
 }
 
-func makeTodo(subject string) *model.Todo {
-	todo := new(model.Todo)
+func makeTodo(subject string) *Todo {
+	todo := new(Todo)
 	todo.UserId = 1
 	todo.Subject = subject
 	todo.Body = "Test Todo Body"
-	todo.Status = model.TodoStatusNotStarted
+	todo.Status = TodoStatusNotStarted
 	return todo
 }
 
 func createTestTodo(subject string) (int64, error) {
 	todo := makeTodo(subject)
-	return createTodo(todo)
+	return CreateTodo(todo)
 }
 
 func deleteAll() {

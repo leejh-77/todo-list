@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"todo-list/base"
-	"todo-list/web/auth"
+	"todo-list/controllers"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 
 	e.GET("/hello", helloWorld)
 
-	auth.Init(e.Group("/"))
+	controllers.UserController{}.Init(e.Group("/"))
 
 	r := e.Group("api")
 	r.Use(middleware.JWT(base.JWTSecret))

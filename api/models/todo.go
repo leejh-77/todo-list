@@ -1,11 +1,23 @@
-package todo
+package models
 
-import (
-	"todo-list/base"
-	"todo-list/model"
+import "todo-list/base"
+
+const (
+	TodoStatusNotStarted = 0
+	TodoStatusInProgress = 1
+	TodoStatusCompleted = 2
 )
 
-func createTodo(t *model.Todo) (int64, error) {
+type Todo struct {
+	Id int64
+	UserId int64
+	Subject string
+	Body string
+	Status int
+	CompletedTime int64
+}
+
+func CreateTodo(t *Todo) (int64, error) {
 	ret, err := base.DB.Exec(
 		"INSERT INTO todos (userId, subject, body, status, completedTime) VALUES (?, ?, ?, ?, ?)",
 		t.UserId, t.Subject, t.Body, t.Status, t.CompletedTime)
@@ -15,19 +27,19 @@ func createTodo(t *model.Todo) (int64, error) {
 	return ret.LastInsertId()
 }
 
-func findById(id int64) (*model.Todo, error) {
+func FindById(id int64) (*Todo, error) {
 	return singleResult("id = ?", id)
 }
 
-func findAll() ([]*model.Todo, error) {
+func FindAll() ([]*Todo, error) {
 	return multiResult("")
 }
 
-func findByUserId(id int64) ([]*model.Todo, error) {
+func FindByUserId(id int64) ([]*Todo, error) {
 	return multiResult("userId = ?", id)
 }
 
-func singleResult(where string, args... interface{}) (*model.Todo, error) {
+func singleResult(where string, args... interface{}) (*Todo, error) {
 	arr, err := multiResult(where, args)
 	if err != nil {
 		return nil, err
@@ -35,7 +47,7 @@ func singleResult(where string, args... interface{}) (*model.Todo, error) {
 	return arr[0], nil
 }
 
-func multiResult(where string, args... interface{}) ([]*model.Todo, error) {
+func multiResult(where string, args... interface{}) ([]*Todo, error) {
 	query := "SELECT * FROM todos"
 	if len(where) > 0 {
 		query = query + " WHERE " + where
@@ -46,9 +58,9 @@ func multiResult(where string, args... interface{}) ([]*model.Todo, error) {
 	}
 	defer rows.Close()
 
-	arr := make([]*model.Todo, 0)
+	arr := make([]*Todo, 0)
 	for rows.Next() {
-		todo := new(model.Todo)
+		todo := new(Todo)
 		err = rows.Scan(&todo.Id, &todo.UserId, &todo.Subject, &todo.Body, &todo.Status, &todo.CompletedTime)
 		arr = append(arr, todo)
 	}

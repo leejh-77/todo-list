@@ -1,4 +1,4 @@
-package auth
+package services
 
 import (
 	"github.com/labstack/echo/v4"
@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"todo-list/models"
+	"todo-list/result"
 	"todo-list/test"
-	"todo-list/web/result"
 )
 
 func init() {
@@ -49,7 +50,7 @@ func TestSignUp_password_encrypt(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
-	user, err := findUserByEmailAddress(email)
+	user, err := models.FindUserByEmailAddress(email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,12 +63,13 @@ func TestLogin_valid(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
-	c := logInCommand{
+	c := LogInCommand{
 		EmailAddress: email,
 		Password: password,
 	}
 	ctx := dummyContext()
-	ret = login(ctx, c)
+	ctx.Set("command", c)
+	ret = LogIn(ctx)
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
 
@@ -81,12 +83,14 @@ func TestLogin_should_fail(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
-	c := logInCommand{
+	c := LogInCommand{
 		EmailAddress: email,
 		Password: password + "1",
 	}
 
-	ret = login(dummyContext(), c)
+	ctx := dummyContext()
+	ctx.Set("command", c)
+	ret = LogIn(ctx)
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
@@ -98,9 +102,12 @@ func dummyContext() echo.Context {
 }
 
 func signUpTestUser(email string, password string, username string) *result.ApiResult {
-	c := signUpCommand{}
+	c := SignUpCommand{}
 	c.EmailAddress = email
 	c.Password = password
 	c.Username = username
-	return signUp(c)
+
+	ctx := dummyContext()
+	ctx.Set("command", c)
+	return SignUp(ctx)
 }
