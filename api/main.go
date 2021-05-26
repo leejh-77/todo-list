@@ -16,7 +16,7 @@ func main() {
 
 	e.GET("/hello", helloWorld)
 
-	controllers.UserController{}.Init(e.Group("/"))
+	controllers.AuthController{}.Init(e.Group("/"))
 
 	r := e.Group("api")
 	r.Use(middleware.JWT(base.JWTSecret))

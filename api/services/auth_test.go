@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	test.BeforeTest()
+	models.BeforeTest()
 }
 
 func TestSignup_valid(t *testing.T) {

@@ -1,7 +1,5 @@
 package models
 
-import "todo-list/base"
-
 const (
 	TodoStatusNotStarted = 0
 	TodoStatusInProgress = 1
@@ -17,14 +15,39 @@ type Todo struct {
 	CompletedTime int64
 }
 
-func CreateTodo(t *Todo) (int64, error) {
-	ret, err := base.DB.Exec(
+func SaveTodo(t *Todo) (int64, error) {
+	if t.Id == 0 {
+		return createTodo(t)
+	}
+	return t.Id, updateTodo(t)
+}
+
+func DeleteTodo(id int64) error {
+	_, err := DB.Exec("DELETE FROM todos WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createTodo(t *Todo) (int64, error) {
+	ret, err := DB.Exec(
 		"INSERT INTO todos (userId, subject, body, status, completedTime) VALUES (?, ?, ?, ?, ?)",
 		t.UserId, t.Subject, t.Body, t.Status, t.CompletedTime)
 	if err != nil {
 		return -1, err
 	}
 	return ret.LastInsertId()
+}
+
+func updateTodo(t *Todo) error {
+	_, err := DB.Exec(
+		"UPDATE todos SET userId = ?, subject = ?, body = ?, status = ?, completedTime = ? WHERE id = ?",
+		t.UserId, t.Subject, t.Body, t.Status, t.CompletedTime, t.Id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func FindById(id int64) (*Todo, error) {
@@ -40,9 +63,12 @@ func FindByUserId(id int64) ([]*Todo, error) {
 }
 
 func singleResult(where string, args... interface{}) (*Todo, error) {
-	arr, err := multiResult(where, args)
+	arr, err := multiResult(where, args...)
 	if err != nil {
 		return nil, err
+	}
+	if len(arr) == 0 {
+		return nil, nil
 	}
 	return arr[0], nil
 }
@@ -52,7 +78,7 @@ func multiResult(where string, args... interface{}) ([]*Todo, error) {
 	if len(where) > 0 {
 		query = query + " WHERE " + where
 	}
-	rows, err := base.DB.Query(query, args...)
+	rows, err := DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

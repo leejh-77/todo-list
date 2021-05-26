@@ -4,22 +4,33 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
-	"todo-list/base"
-	"todo-list/test"
+	"time"
 )
 
+var testUser *User
+
 func init() {
-	test.BeforeTest()
+	BeforeTest()
+
+	u := &User{
+		EmailAddress:   "jonghoon.lee@gmail.com",
+		Password:       "password!@#$",
+		Username:       "Jonghoon Lee",
+		RegisteredTime: time.Now().Unix(),
+	}
+	id, err := CreateUser(u)
+	if err != nil {
+		log.Fatal(err)
+	}
+	u.Id = id
+	testUser = u
 }
 
 func TestFindAll(t *testing.T) {
-	deleteAll()
+	BeforeTest()
 
 	for i := 0; i < 3; i++ {
-		_, err := createTestTodo("test todo")
-		if err != nil {
-			t.Fatal(err)
-		}
+		createTestTodo()
 	}
 	todos, err := FindAll()
 	if err != nil {
@@ -29,42 +40,54 @@ func TestFindAll(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	id, err := createTestTodo("Test Todo")
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Greater(t, id, int64(0))
+	todo := createTestTodo()
+	assert.NotNil(t, todo)
 }
 
 func TestUpdate(t *testing.T) {
+	todo := createTestTodo()
+	todo.Subject = "Updated subject"
 
+	_, err := SaveTodo(todo)
+	todo, err = FindById(todo.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "Updated subject", todo.Subject)
 }
 
 func TestDelete(t *testing.T) {
-
-}
-
-func TestComplete(t *testing.T) {
-
+	todo := createTestTodo()
+	err := DeleteTodo(todo.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	todo, err = FindById(todo.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Nil(t, todo)
 }
 
 func makeTodo(subject string) *Todo {
 	todo := new(Todo)
-	todo.UserId = 1
+	todo.UserId = testUser.Id
 	todo.Subject = subject
 	todo.Body = "Test Todo Body"
 	todo.Status = TodoStatusNotStarted
 	return todo
 }
 
-func createTestTodo(subject string) (int64, error) {
-	todo := makeTodo(subject)
-	return CreateTodo(todo)
-}
-
-func deleteAll() {
-	_, err := base.DB.Exec("TRUNCATE TABLE todos")
+func createTestTodo() *Todo {
+	todo := makeTodo("Test Todo")
+	id, err := SaveTodo(todo)
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
+	todo, err = FindById(id)
+	if err != nil {
+		return nil
+	}
+	return todo
 }

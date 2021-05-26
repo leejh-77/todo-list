@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	test.BeforeTest()
+	BeforeTest()
 }
 
 func TestCreateUser(t *testing.T) {

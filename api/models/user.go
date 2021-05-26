@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"todo-list/base"
 )
 
 type User struct {
@@ -14,7 +13,7 @@ type User struct {
 }
 
 func CreateUser(user *User) (int64, error) {
-	ret, err := base.DB.Exec(
+	ret, err := DB.Exec(
 		"INSERT INTO users (emailAddress, password, username, registeredTime) VALUES (?, ?, ?, ?)",
 		user.EmailAddress, user.Password, user.Username, user.RegisteredTime)
 	if err != nil {
@@ -24,11 +23,19 @@ func CreateUser(user *User) (int64, error) {
 }
 
 func FindUserById(id int64) (*User, error) {
-	return scanUser(base.DB.Query("SELECT * FROM users WHERE id = ?", id))
+	return query("id = ?", id)
 }
 
 func FindUserByEmailAddress(email string) (*User, error) {
-	return scanUser(base.DB.Query("SELECT * FROM users WHERE emailAddress = ?", email))
+	return query("emailAddress = ?", email)
+}
+
+func query(query string, args... interface{}) (*User, error) {
+	q := "SELECT * FROM users"
+	if len(query) > 0 {
+		 q = q + " WHERE " + query
+	}
+	return scanUser(DB.Query(q, args...))
 }
 
 func scanUser(rows *sql.Rows, err error) (*User, error) {
