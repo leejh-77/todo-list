@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `todos` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `folderId` INT NOT NULL,
+    `userId` INT NOT NULL,
     `subject` VARCHAR(50),
     `body` TEXT,
     `status` INT NOT NULL,

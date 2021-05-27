@@ -8,6 +8,7 @@ const (
 
 type Todo struct {
 	Id int64
+	FolderId int64
 	UserId int64
 	Subject string
 	Body string
@@ -32,7 +33,7 @@ func DeleteTodo(id int64) error {
 
 func createTodo(t *Todo) (int64, error) {
 	ret, err := DB.Exec(
-		"INSERT INTO todos (userId, subject, body, status, completedTime) VALUES (?, ?, ?, ?, ?)",
+		"INSERT INTO todos (folderId, subject, body, status, completedTime) VALUES (?, ?, ?, ?, ?)",
 		t.UserId, t.Subject, t.Body, t.Status, t.CompletedTime)
 	if err != nil {
 		return -1, err
