@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"bytes"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -25,6 +26,7 @@ type Table struct {
 
 	insertQuery string
 	updateQuery string
+	deleteQuery string
 }
 
 func NewTable(name string, entity interface{}) *Table {
@@ -49,6 +51,8 @@ func (t *Table) init() {
 	t.fields = fs
 
 	t.makeInsertQuery()
+	t.makeUpdateQuery()
+	t.makeDeleteQuery()
 }
 
 func (t *Table) makeInsertQuery() {
@@ -56,6 +60,23 @@ func (t *Table) makeInsertQuery() {
 	params = params[:len(params) - 1]
 	t.insertQuery =
 		"INSERT INTO " + t.name + " (" + strings.Join(t.fields, ",") + ") VALUES (" + params + ")"
+}
+
+func (t *Table) makeUpdateQuery() {
+	buf := bytes.Buffer{}
+	buf.WriteString("UPDATE " + t.name + " SET")
+
+	fs := t.fields
+	for _, f := range fs {
+		buf.WriteString(" " + f + " = ?,")
+	}
+	buf.Truncate(buf.Len() - 1)
+	buf.WriteString(" WHERE id = ?")
+	t.updateQuery = buf.String()
+}
+
+func (t *Table) makeDeleteQuery() {
+	t.deleteQuery = "DELETE FROM " + t.name + " WHERE id = ?"
 }
 
 func (t *Table) FindById(id int64) (interface{}, error) {
@@ -80,7 +101,7 @@ func (t *Table) Find(where string, args... interface{}) ([]interface{}, error) {
 }
 
 func (t *Table) FindOne(where string, args... interface{}) (interface{}, error) {
-	arr, err := t.Find(where, args)
+	arr, err := t.Find(where, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,23 +111,45 @@ func (t *Table) FindOne(where string, args... interface{}) (interface{}, error) 
 	return arr[0], nil
 }
 
-func (t *Table) Save(i interface{}) (int64, error) {
-	v := reflect.ValueOf(i)
-
-	cnt := v.NumField()
-	arr := make([]interface{}, 0, cnt)
-	for i := 0; i < cnt; i++ {
-		if i == 0 { // 땜빵
-			continue
-		}
-		f := v.Field(i)
-		arr = append(arr, f.Interface())
-	}
-	ret, err := db.Exec(t.insertQuery, arr...)
+func (t *Table) Insert(i interface{}) (int64, error) {
+	params := t.resolveParams(i)
+	ret, err := db.Exec(t.insertQuery, params...)
 	if err != nil {
 		return -1, err
 	}
 	return ret.LastInsertId()
+}
+
+func (t *Table) Update(i interface{}) error {
+	id := t.getId(i)
+	params := t.resolveParams(i)
+	params = append(params, id)
+
+	_, err := db.Exec(t.updateQuery, params...)
+	return err
+}
+
+func (t *Table) Delete(id int64) error {
+	_, err := db.Exec(t.deleteQuery, id)
+	return err
+}
+
+func (t *Table) getId(i interface{}) int64 {
+	v := reflect.ValueOf(i).Elem()
+	f := v.FieldByName("Id")
+	return f.Int()
+}
+
+func (t *Table) resolveParams(i interface{}) []interface{} {
+	v := reflect.ValueOf(i).Elem()
+
+	fs := t.fields
+	arr := make([]interface{}, 0, len(fs))
+	for _, f := range fs {
+		f := v.FieldByName(f)
+		arr = append(arr, f.Interface())
+	}
+	return arr
 }
 
 func (t *Table) read(row *sql.Rows) ([]interface{}, error) {
