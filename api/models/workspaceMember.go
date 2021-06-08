@@ -11,12 +11,3 @@ type WorkspaceMember struct {
 	WorkspaceId int64
 	UserId int64
 }
-
-func SaveWorkspaceMember(m *WorkspaceMember) (int64, error) {
-	ret, err := DB.Exec("INSERT INTO workspaceMembers (type, workspaceId, userId) VALUES (?, ?, ?)",
-		m.Type, m.WorkspaceId, m.UserId)
-	if err != nil {
-		return -1, err
-	}
-	return ret.LastInsertId()
-}

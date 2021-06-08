@@ -1,7 +1,7 @@
 package models
 
 import (
-	"database/sql"
+	"todo-list/orm"
 )
 
 type User struct {
@@ -12,44 +12,14 @@ type User struct {
 	RegisteredTime int64
 }
 
-func CreateUser(user *User) (int64, error) {
-	ret, err := DB.Exec(
-		"INSERT INTO users (emailAddress, password, username, registeredTime) VALUES (?, ?, ?, ?)",
-		user.EmailAddress, user.Password, user.Username, user.RegisteredTime)
-	if err != nil {
-		return -1, err
-	}
-	return ret.LastInsertId()
+type userTable struct {
+	*orm.Table
 }
 
-func FindUserById(id int64) (*User, error) {
-	return query("id = ?", id)
+var Users = userTable{
+	orm.NewTable("users", User{}),
 }
 
-func FindUserByEmailAddress(email string) (*User, error) {
-	return query("emailAddress = ?", email)
-}
-
-func query(query string, args... interface{}) (*User, error) {
-	q := "SELECT * FROM users"
-	if len(query) > 0 {
-		 q = q + " WHERE " + query
-	}
-	return scanUser(DB.Query(q, args...))
-}
-
-func scanUser(rows *sql.Rows, err error) (*User, error) {
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return nil, nil
-	}
-	user := new(User)
-	err = rows.Scan(&user.Id, &user.EmailAddress, &user.Password, &user.Username, &user.RegisteredTime)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+func (t *userTable) FindByEmailAddress(u *User, email string) error {
+	return t.Table.FindOne(u, "emailAddress = ?", email)
 }

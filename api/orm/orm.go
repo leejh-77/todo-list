@@ -79,36 +79,42 @@ func (t *Table) makeDeleteQuery() {
 	t.deleteQuery = "DELETE FROM " + t.name + " WHERE id = ?"
 }
 
-func (t *Table) FindById(id int64) (interface{}, error) {
-	return t.FindOne("id = ?", id)
+func (t *Table) FindById(i interface{}, id int64) error {
+	return t.FindOne(i, "id = ?", id)
 }
 
-func (t *Table) FindAll() ([]interface{}, error) {
-	return t.Find("")
+func (t *Table) FindAll(i interface{}) error {
+	return t.Find(i, "")
 }
 
-func (t *Table) Find(where string, args... interface{}) ([]interface{}, error) {
+func (t *Table) Find(i interface{}, where string, args... interface{}) error {
+	t.ensureType(i)
+
 	q := "SELECT * FROM " + t.name
 	if len(where) > 0 {
 		q = q + " WHERE " + where
 	}
 	ret, err := db.Query(q, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer ret.Close()
-	return t.read(ret)
+	return t.read(i, ret)
 }
 
-func (t *Table) FindOne(where string, args... interface{}) (interface{}, error) {
-	arr, err := t.Find(where, args...)
+func (t *Table) ensureType(i interface{}) {
+	k := reflect.TypeOf(i).Kind()
+	if k != reflect.Ptr {
+		panic("parameter must be pointer")
+	}
+}
+
+func (t *Table) FindOne(i interface{}, where string, args... interface{}) error {
+	err := t.Find(i, where, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if len(arr) == 0 {
-		return nil, nil
-	}
-	return arr[0], nil
+	return nil
 }
 
 func (t *Table) Insert(i interface{}) (int64, error) {
@@ -152,16 +158,29 @@ func (t *Table) resolveParams(i interface{}) []interface{} {
 	return arr
 }
 
-func (t *Table) read(row *sql.Rows) ([]interface{}, error) {
+func (t *Table) read(i interface{}, row *sql.Rows) error {
 	arr := make([]interface{}, 0)
 	for row.Next() {
 		obj, err := t.readFromRow(row)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		arr = append(arr, obj)
 	}
-	return arr, nil
+
+	v := reflect.ValueOf(i).Elem()
+	k := v.Kind()
+
+	var refValue reflect.Value
+	if len(arr) == 0 {
+		refValue = reflect.Zero(v.Type())
+	} else if k == reflect.Struct {
+		refValue = reflect.ValueOf(arr[0]).Elem()
+	} else if k == reflect.Slice {
+		refValue = reflect.ValueOf(arr).Elem()
+	}
+	v.Set(refValue)
+	return nil
 }
 
 func (t *Table) readFromRow(row *sql.Rows) (interface{}, error){

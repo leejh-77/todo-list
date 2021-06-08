@@ -18,7 +18,7 @@ func init() {
 		Username:       "Jonghoon Lee",
 		RegisteredTime: time.Now().Unix(),
 	}
-	id, err := CreateUser(u)
+	id, err := Users.Insert(u)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,11 +32,13 @@ func TestFindAll(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		createTestTodo()
 	}
-	todos, err := FindAll()
+
+	arr := make([]*Todo, 0)
+	err := Todos.FindAll(&arr)
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, 3, len(todos))
+	assert.Equal(t, 3, len(arr))
 }
 
 func TestCreate(t *testing.T) {
@@ -48,8 +50,8 @@ func TestUpdate(t *testing.T) {
 	todo := createTestTodo()
 	todo.Subject = "Updated subject"
 
-	_, err := SaveTodo(todo)
-	todo, err = FindById(todo.Id)
+	err := Todos.Update(todo)
+	err = Todos.FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,11 +61,11 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	todo := createTestTodo()
-	err := DeleteTodo(todo.Id)
+	err := Todos.Delete(todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	todo, err = FindById(todo.Id)
+	err = Todos.FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,11 +83,11 @@ func makeTodo(subject string) *Todo {
 
 func createTestTodo() *Todo {
 	todo := makeTodo("Test Todo")
-	id, err := SaveTodo(todo)
+	id, err := Todos.Insert(todo)
 	if err != nil {
 		return nil
 	}
-	todo, err = FindById(id)
+	err = Todos.FindById(todo, id)
 	if err != nil {
 		return nil
 	}

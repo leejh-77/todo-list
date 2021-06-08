@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"log"
 	"reflect"
 	"testing"
 )
@@ -47,4 +48,28 @@ func TestCreateObject(t *testing.T) {
 	o := reflect.New(reflect.TypeOf(obj))
 	_, ok := o.Elem().Interface().(TestObject)
 	t.Log(ok)
+}
+
+func TestReflectArray(t *testing.T) {
+	var i int
+	fillData(&i)
+
+	var arr []int64
+	fillData(&arr)
+}
+
+func fillData(i interface{}) {
+	data := make([]int64, 0)
+	for i := 5; i > 0; i-- {
+		data = append(data, int64(i))
+	}
+
+	v := reflect.ValueOf(i).Elem()
+	k := v.Kind()
+	if k == reflect.Int {
+		v.SetInt(data[0])
+	} else if k == reflect.Slice {
+		v.Set(reflect.ValueOf(data))
+	}
+	log.Println(k)
 }

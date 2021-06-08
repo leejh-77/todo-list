@@ -4,17 +4,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-	"todo-list/models"
 )
 
-func init() {
-	models.BeforeTest()
+type Book struct {
+	Id int64
+	Subject string
+	Author string
+	PublishedTime time.Time
 }
 
+var table = NewTable("books", Book{})
+
 func TestCreate(t *testing.T) {
-	table := NewTable("users", models.User{})
-	user := userMock()
-	id, err := table.Insert(user)
+	book := bookMock()
+	id, err := table.Insert(book)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,51 +25,60 @@ func TestCreate(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	table := NewTable("users", models.User{})
-	user := userMock()
-	id, err := table.Insert(user)
+	book := bookMock()
+	id, err := table.Insert(book)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assert.NotEqual(t, id, int64(-1))
 
-	u, err := table.FindById(id)
+	err = table.FindById(book, id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	user = u.(*models.User)
-	user.Username = "Todo-list"
-	err = table.Update(user)
+	book.Author = "Another author"
+	err = table.Update(book)
 	if err != nil {
 		t.Fatal(err)
 	}
-	u, err = table.FindById(id)
+	err = table.FindById(book, id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	user = u.(*models.User)
-	assert.Equal(t, user.Username, "Todo-list")
+	assert.Equal(t, book.Author, "Another author")
 }
 
 func TestDelete(t *testing.T) {
-
+	book := bookMock()
+	id, err := table.Insert(book)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = table.Delete(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = table.FindById(book, id)
+	if err != nil {
+		t.Fatal()
+	}
+	assert.Equal(t, int64(0), book.Id)
 }
 
 func TestFind(t *testing.T) {
-	table := NewTable("users", models.User{})
-	arr, err := table.FindAll()
+	arr := make([]*Book, 0)
+	err := table.FindAll(arr)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(arr)
 }
 
-func userMock() *models.User {
-	return &models.User{
-		EmailAddress:   "jonghoon.lee@gmail.com",
-		Password:       "password#@$!",
-		Username:       "Jonghoon Lee",
-		RegisteredTime: time.Now().Unix(),
+func bookMock() *Book {
+	return &Book{
+		Subject:   "fun programming",
+		Author:       "programmer",
+		PublishedTime: time.Now(),
 	}
 }
 
