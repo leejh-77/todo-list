@@ -51,7 +51,7 @@ func TestCreateObject(t *testing.T) {
 }
 
 func TestReflectArray(t *testing.T) {
-	var i int
+	var i int64
 	fillData(&i)
 
 	var arr []int64

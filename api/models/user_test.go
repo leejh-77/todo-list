@@ -4,11 +4,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+	"todo-list/base"
+	"todo-list/orm"
 	"todo-list/test"
 )
 
 func init() {
-	BeforeTest()
+	orm.Init(base.DBConfig)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -21,7 +23,7 @@ func TestCreateUser(t *testing.T) {
 	assert.NotEqual(t, -1, id)
 }
 
-func TestFindByEmailAddress(t *testing.T) {
+func TestFindUserByEmailAddress(t *testing.T) {
 	email := test.UniqueString("test.user@gmail.com")
 
 	id, err := createUser(email)
@@ -36,7 +38,7 @@ func TestFindByEmailAddress(t *testing.T) {
 	assert.Equal(t, id, u.Id)
 }
 
-func TestFindById(t *testing.T) {
+func TestFindUserById(t *testing.T) {
 	email := test.UniqueString("test.user@gmail.com")
 
 	id, err := createUser(email)

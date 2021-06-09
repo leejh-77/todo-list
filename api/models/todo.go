@@ -21,7 +21,3 @@ type Todo struct {
 type todoTable struct {
 	*orm.Table
 }
-
-var Todos = todoTable{
-	orm.NewTable("todos", Todo{}),
-}

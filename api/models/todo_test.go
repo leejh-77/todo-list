@@ -7,24 +7,6 @@ import (
 	"time"
 )
 
-var testUser *User
-
-func init() {
-	BeforeTest()
-
-	u := &User{
-		EmailAddress:   "jonghoon.lee@gmail.com",
-		Password:       "password!@#$",
-		Username:       "Jonghoon Lee",
-		RegisteredTime: time.Now().Unix(),
-	}
-	id, err := Users.Insert(u)
-	if err != nil {
-		log.Fatal(err)
-	}
-	u.Id = id
-	testUser = u
-}
 
 func TestFindAll(t *testing.T) {
 	BeforeTest()
@@ -33,7 +15,7 @@ func TestFindAll(t *testing.T) {
 		createTestTodo()
 	}
 
-	arr := make([]*Todo, 0)
+	var arr []Todo
 	err := Todos.FindAll(&arr)
 	if err != nil {
 		t.Fatal(err)
@@ -41,12 +23,12 @@ func TestFindAll(t *testing.T) {
 	assert.Equal(t, 3, len(arr))
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateTodo(t *testing.T) {
 	todo := createTestTodo()
 	assert.NotNil(t, todo)
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdateTodo(t *testing.T) {
 	todo := createTestTodo()
 	todo.Subject = "Updated subject"
 
@@ -59,7 +41,7 @@ func TestUpdate(t *testing.T) {
 	assert.Equal(t, "Updated subject", todo.Subject)
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteTodo(t *testing.T) {
 	todo := createTestTodo()
 	err := Todos.Delete(todo.Id)
 	if err != nil {
@@ -69,12 +51,12 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Nil(t, todo)
+	assert.Equal(t, int64(0), todo.Id)
 }
 
 func makeTodo(subject string) *Todo {
 	todo := new(Todo)
-	todo.UserId = testUser.Id
+	todo.UserId = testUser().Id
 	todo.Subject = subject
 	todo.Body = "Test Todo Body"
 	todo.Status = TodoStatusNotStarted
@@ -92,4 +74,26 @@ func createTestTodo() *Todo {
 		return nil
 	}
 	return todo
+}
+
+func testUser() *User {
+	email := "todo.test.user@gmail.com"
+
+	var u User
+	_ = Users.FindByEmailAddress(&u, email)
+	if u.Id > 0 {
+		return &u
+	}
+	u = User{
+		EmailAddress:   email,
+		Password:       "password!@#$",
+		Username:       "Jonghoon Lee",
+		RegisteredTime: time.Now().Unix(),
+	}
+	id, err := Users.Insert(&u)
+	if err != nil {
+		log.Fatal(err)
+	}
+	u.Id = id
+	return &u
 }

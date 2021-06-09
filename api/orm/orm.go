@@ -11,18 +11,26 @@ import (
 
 var db *sql.DB
 
-func init() {
-	d, err := sql.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/todo")
+type DatabaseConfig struct {
+	Driver string
+	Host string
+	User string
+	Password string
+	Name string
+}
+
+func Init(c DatabaseConfig) {
+	i, err := sql.Open(c.Driver, c.User + ":" + c.Password + "@tcp(" + c.Host + ")/" + c.Name)
 	if err != nil {
 		log.Fatal(err)
 	}
-	db = d
+	db = i
 }
 
 type Table struct {
 	name string
 	entityType reflect.Type
-	fields []string
+	fields []reflect.StructField
 
 	insertQuery string
 	updateQuery string
@@ -40,26 +48,75 @@ func NewTable(name string, entity interface{}) *Table {
 func (t *Table) init() {
 	e := t.entityType
 	cnt := e.NumField()
-	fs := make([]string, 0, cnt)
+	fs := make([]reflect.StructField, 0, cnt)
 	for i := 0; i < cnt; i++ {
-		n := e.Field(i).Name
+		f := e.Field(i)
+		n := f.Name
 		if n == "Id" {
 			continue
 		}
-		fs = append(fs, n)
+		fs = append(fs, f)
 	}
 	t.fields = fs
+
+	t.createTable()
 
 	t.makeInsertQuery()
 	t.makeUpdateQuery()
 	t.makeDeleteQuery()
 }
 
+func (t *Table) createTable() {
+	buf := bytes.Buffer{}
+	buf.WriteString("CREATE TABLE IF NOT EXISTS `" + t.name + "` (")
+	buf.WriteString("`id` INT PRIMARY KEY AUTO_INCREMENT, ")
+
+	for _, f := range t.fields {
+		str := t.typeString(f.Type)
+		buf.WriteString("`" + f.Name + "` " + str + ", ")
+	}
+	buf.Truncate(buf.Len() - 2)
+	buf.WriteString(")")
+
+	query := buf.String()
+	_, err := db.Exec(query)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (t *Table) typeString(p reflect.Type) string {
+	k := p.Kind()
+	if k == reflect.String {
+		return "TEXT"
+	}
+	if k == reflect.Int64 {
+		return "INT"
+	}
+	str := p.String()
+	if str == "time.Time" {
+		return "TIMESTAMP"
+	}
+	return "BLOB"
+}
+
 func (t *Table) makeInsertQuery() {
+	buf := bytes.Buffer{}
+	buf.WriteString("INSERT INTO " + t.name + " (")
+
+	fs := t.fields
+	for _, f := range fs {
+		buf.WriteString(f.Name + ",")
+	}
+	buf.Truncate(buf.Len() - 1)
+	buf.WriteString(") VALUES (")
+
 	params := strings.Repeat("?,", len(t.fields))
 	params = params[:len(params) - 1]
-	t.insertQuery =
-		"INSERT INTO " + t.name + " (" + strings.Join(t.fields, ",") + ") VALUES (" + params + ")"
+
+	buf.WriteString(params)
+	buf.WriteString(")")
+	t.insertQuery = buf.String()
 }
 
 func (t *Table) makeUpdateQuery() {
@@ -68,7 +125,7 @@ func (t *Table) makeUpdateQuery() {
 
 	fs := t.fields
 	for _, f := range fs {
-		buf.WriteString(" " + f + " = ?,")
+		buf.WriteString(" " + f.Name + " = ?,")
 	}
 	buf.Truncate(buf.Len() - 1)
 	buf.WriteString(" WHERE id = ?")
@@ -152,32 +209,32 @@ func (t *Table) resolveParams(i interface{}) []interface{} {
 	fs := t.fields
 	arr := make([]interface{}, 0, len(fs))
 	for _, f := range fs {
-		f := v.FieldByName(f)
+		f := v.FieldByName(f.Name)
 		arr = append(arr, f.Interface())
 	}
 	return arr
 }
 
 func (t *Table) read(i interface{}, row *sql.Rows) error {
-	arr := make([]interface{}, 0)
+	arr := reflect.MakeSlice(reflect.SliceOf(t.entityType), 0, 20)
 	for row.Next() {
 		obj, err := t.readFromRow(row)
 		if err != nil {
 			return err
 		}
-		arr = append(arr, obj)
+		arr = reflect.Append(arr, reflect.ValueOf(obj).Elem())
 	}
 
 	v := reflect.ValueOf(i).Elem()
 	k := v.Kind()
 
 	var refValue reflect.Value
-	if len(arr) == 0 {
+	if arr.Len() == 0 {
 		refValue = reflect.Zero(v.Type())
 	} else if k == reflect.Struct {
-		refValue = reflect.ValueOf(arr[0]).Elem()
+		refValue = arr.Index(0)
 	} else if k == reflect.Slice {
-		refValue = reflect.ValueOf(arr).Elem()
+		refValue = arr
 	}
 	v.Set(refValue)
 	return nil

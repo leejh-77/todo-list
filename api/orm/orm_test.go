@@ -6,14 +6,27 @@ import (
 	"time"
 )
 
+var config = DatabaseConfig{
+	Driver:   "mysql",
+	Host:     "127.0.0.1:3306",
+	User:     "root",
+	Password: "1234",
+	Name:     "orm",
+}
+
 type Book struct {
 	Id int64
 	Subject string
 	Author string
-	PublishedTime time.Time
+	PublishedTime int64
 }
 
-var table = NewTable("books", Book{})
+var table *Table
+
+func init() {
+	Init(config)
+	table = NewTable("books", Book{})
+}
 
 func TestCreate(t *testing.T) {
 	book := bookMock()
@@ -66,19 +79,19 @@ func TestDelete(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	arr := make([]*Book, 0)
-	err := table.FindAll(arr)
+	var books []Book
+	err := table.FindAll(&books)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(arr)
+	t.Log(books)
 }
 
 func bookMock() *Book {
 	return &Book{
 		Subject:   "fun programming",
 		Author:       "programmer",
-		PublishedTime: time.Now(),
+		PublishedTime: time.Now().Unix(),
 	}
 }
 
