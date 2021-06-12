@@ -27,6 +27,18 @@ func Init(c DatabaseConfig) {
 	db = i
 }
 
+func InTransaction(fn func(tx *sql.Tx) error) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	err = fn(tx)
+	if err != nil {
+		return tx.Rollback()
+	}
+	return tx.Commit()
+}
+
 type Table struct {
 	name string
 	entityType reflect.Type
@@ -194,6 +206,11 @@ func (t *Table) Update(i interface{}) error {
 
 func (t *Table) Delete(id int64) error {
 	_, err := db.Exec(t.deleteQuery, id)
+	return err
+}
+
+func (t *Table) DeleteAll() error {
+	_, err := db.Exec("TRUNCATE TABLE " + t.name)
 	return err
 }
 

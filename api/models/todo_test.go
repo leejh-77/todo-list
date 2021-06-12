@@ -9,8 +9,6 @@ import (
 
 
 func TestFindAll(t *testing.T) {
-	BeforeTest()
-
 	for i := 0; i < 3; i++ {
 		createTestTodo()
 	}

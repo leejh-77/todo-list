@@ -39,7 +39,7 @@ func SignUp(ctx echo.Context) *result.ApiResult {
 	user.Username = c.Username
 	user.RegisteredTime = time.Now().Unix()
 
-	_, err = models.CreateUser(user)
+	_, err = models.Users.Insert(user)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -49,17 +49,18 @@ func SignUp(ctx echo.Context) *result.ApiResult {
 func LogIn(ctx echo.Context) *result.ApiResult {
 	c := ctx.Get("command").(LogInCommand)
 
-	user, err := models.FindUserByEmailAddress(c.EmailAddress)
+	var user models.User
+	err := models.Users.FindByEmailAddress(&user, c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}
-	if user == nil {
+	if user.Id == int64(0) {
 		return result.BadRequest("User not found for email - " + c.EmailAddress)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.Password)); err != nil {
 		return result.BadRequest("Password not matched")
 	}
-	token, err := createJwt(c.EmailAddress)
+	token, err := createJwt(user.Id, c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}

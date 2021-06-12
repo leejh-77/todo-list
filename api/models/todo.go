@@ -16,6 +16,7 @@ type Todo struct {
 	Body string
 	Status int
 	CompletedTime int64
+	Position int
 }
 
 type todoTable struct {

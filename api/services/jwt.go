@@ -6,10 +6,11 @@ import (
 	"todo-list/base"
 )
 
-func createJwt(email string) (*string, error) {
+func createJwt(id int64, email string) (*string, error) {
 	c := jwt.MapClaims{}
 	c["exp"] = time.Now().Add(time.Hour).Unix()
 	c["email"] = email
+	c["uid"] = id
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 

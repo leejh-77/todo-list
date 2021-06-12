@@ -1,19 +1,13 @@
 package services
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"todo-list/models"
 	"todo-list/result"
 	"todo-list/test"
 )
-
-func init() {
-	models.BeforeTest()
-}
 
 func TestSignup_valid(t *testing.T) {
 	ret := signUpTestUser(
@@ -50,7 +44,8 @@ func TestSignUp_password_encrypt(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
-	user, err := models.FindUserByEmailAddress(email)
+	var user models.User
+	err := models.Users.FindByEmailAddress(&user, email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,12 +89,6 @@ func TestLogin_should_fail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
-func dummyContext() echo.Context {
-	req := httptest.NewRequest("GET", "http://localhost", nil)
-	rec := httptest.NewRecorder()
-	e := echo.New()
-	return e.NewContext(req, rec)
-}
 
 func signUpTestUser(email string, password string, username string) *result.ApiResult {
 	c := SignUpCommand{}
