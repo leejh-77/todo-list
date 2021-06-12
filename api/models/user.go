@@ -13,9 +13,15 @@ type User struct {
 }
 
 type userTable struct {
-	*orm.Table
+	*orm.ORMTable
+}
+
+func UserTable() *userTable {
+	return &userTable{
+		orm.Table(tUser),
+	}
 }
 
 func (t *userTable) FindByEmailAddress(u *User, email string) error {
-	return t.Table.FindOne(u, "emailAddress = ?", email)
+	return t.FindOne(u, "emailAddress = ?", email)
 }

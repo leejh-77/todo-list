@@ -9,5 +9,11 @@ type Workspace struct {
 }
 
 type workspaceTable struct {
-	*orm.Table
+	*orm.ORMTable
+}
+
+func WorkspaceTable() *workspaceTable {
+	return &workspaceTable{
+		orm.Table(tWorkspace),
+	}
 }

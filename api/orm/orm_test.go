@@ -21,16 +21,16 @@ type Book struct {
 	PublishedTime int64
 }
 
-var table *Table
+var tBook = "books"
 
 func init() {
 	Init(config)
-	table = NewTable("books", Book{})
+	Register(tBook, Book{})
 }
 
 func TestCreate(t *testing.T) {
 	book := bookMock()
-	id, err := table.Insert(book)
+	id, err := Table(tBook).Insert(book)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,22 +39,22 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	book := bookMock()
-	id, err := table.Insert(book)
+	id, err := Table(tBook).Insert(book)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assert.NotEqual(t, id, int64(-1))
 
-	err = table.FindById(book, id)
+	err = Table(tBook).FindById(book, id)
 	if err != nil {
 		t.Fatal(err)
 	}
 	book.Author = "Another author"
-	err = table.Update(book)
+	err = Table(tBook).Update(book)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = table.FindById(book, id)
+	err = Table(tBook).FindById(book, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,15 +63,15 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	book := bookMock()
-	id, err := table.Insert(book)
+	id, err := Table(tBook).Insert(book)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = table.Delete(id)
+	err = Table(tBook).Delete(id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = table.FindById(book, id)
+	err = Table(tBook).FindById(book, id)
 	if err != nil {
 		t.Fatal()
 	}
@@ -80,7 +80,7 @@ func TestDelete(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	var books []Book
-	err := table.FindAll(&books)
+	err := Table(tBook).FindAll(&books)
 	if err != nil {
 		t.Fatal(err)
 	}

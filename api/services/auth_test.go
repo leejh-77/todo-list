@@ -45,7 +45,7 @@ func TestSignUp_password_encrypt(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
 	var user models.User
-	err := models.Users.FindByEmailAddress(&user, email)
+	err := models.UserTable.FindByEmailAddress(&user, email)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,12 +9,14 @@ import (
 
 
 func TestFindAll(t *testing.T) {
+	_ = TodoTable().DeleteAll()
+
 	for i := 0; i < 3; i++ {
 		createTestTodo()
 	}
 
 	var arr []Todo
-	err := Todos.FindAll(&arr)
+	err := TodoTable().FindAll(&arr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,8 +32,8 @@ func TestUpdateTodo(t *testing.T) {
 	todo := createTestTodo()
 	todo.Subject = "Updated subject"
 
-	err := Todos.Update(todo)
-	err = Todos.FindById(todo, todo.Id)
+	err := TodoTable().Update(todo)
+	err = TodoTable().FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,11 +43,11 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestDeleteTodo(t *testing.T) {
 	todo := createTestTodo()
-	err := Todos.Delete(todo.Id)
+	err := TodoTable().Delete(todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = Todos.FindById(todo, todo.Id)
+	err = TodoTable().FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,11 +65,11 @@ func makeTodo(subject string) *Todo {
 
 func createTestTodo() *Todo {
 	todo := makeTodo("Test Todo")
-	id, err := Todos.Insert(todo)
+	id, err := TodoTable().Insert(todo)
 	if err != nil {
 		return nil
 	}
-	err = Todos.FindById(todo, id)
+	err = TodoTable().FindById(todo, id)
 	if err != nil {
 		return nil
 	}
@@ -78,7 +80,7 @@ func testUser() *User {
 	email := "todo.test.user@gmail.com"
 
 	var u User
-	_ = Users.FindByEmailAddress(&u, email)
+	_ = UserTable().FindByEmailAddress(&u, email)
 	if u.Id > 0 {
 		return &u
 	}
@@ -88,7 +90,7 @@ func testUser() *User {
 		Username:       "Jonghoon Lee",
 		RegisteredTime: time.Now().Unix(),
 	}
-	id, err := Users.Insert(&u)
+	id, err := UserTable().Insert(&u)
 	if err != nil {
 		log.Fatal(err)
 	}

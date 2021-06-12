@@ -27,19 +27,7 @@ func Init(c DatabaseConfig) {
 	db = i
 }
 
-func InTransaction(fn func(tx *sql.Tx) error) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	err = fn(tx)
-	if err != nil {
-		return tx.Rollback()
-	}
-	return tx.Commit()
-}
-
-type Table struct {
+type ORMTable struct {
 	name string
 	entityType reflect.Type
 	fields []reflect.StructField
@@ -49,15 +37,21 @@ type Table struct {
 	deleteQuery string
 }
 
-func NewTable(name string, entity interface{}) *Table {
-	table := &Table{}
-	table.name = name
-	table.entityType = reflect.TypeOf(entity)
-	table.init()
-	return table
+var tables = make(map[string]*ORMTable)
+
+func Table(name string) *ORMTable {
+	return tables[name]
 }
 
-func (t *Table) init() {
+func Register(name string, entity interface{}) {
+	t := &ORMTable{}
+	t.name = name
+	t.entityType = reflect.TypeOf(entity)
+	t.init()
+	tables[name] = t
+}
+
+func (t *ORMTable) init() {
 	e := t.entityType
 	cnt := e.NumField()
 	fs := make([]reflect.StructField, 0, cnt)
@@ -78,7 +72,7 @@ func (t *Table) init() {
 	t.makeDeleteQuery()
 }
 
-func (t *Table) createTable() {
+func (t *ORMTable) createTable() {
 	buf := bytes.Buffer{}
 	buf.WriteString("CREATE TABLE IF NOT EXISTS `" + t.name + "` (")
 	buf.WriteString("`id` INT PRIMARY KEY AUTO_INCREMENT, ")
@@ -97,7 +91,7 @@ func (t *Table) createTable() {
 	}
 }
 
-func (t *Table) typeString(p reflect.Type) string {
+func (t *ORMTable) typeString(p reflect.Type) string {
 	k := p.Kind()
 	if k == reflect.String {
 		return "TEXT"
@@ -112,7 +106,7 @@ func (t *Table) typeString(p reflect.Type) string {
 	return "BLOB"
 }
 
-func (t *Table) makeInsertQuery() {
+func (t *ORMTable) makeInsertQuery() {
 	buf := bytes.Buffer{}
 	buf.WriteString("INSERT INTO " + t.name + " (")
 
@@ -131,7 +125,7 @@ func (t *Table) makeInsertQuery() {
 	t.insertQuery = buf.String()
 }
 
-func (t *Table) makeUpdateQuery() {
+func (t *ORMTable) makeUpdateQuery() {
 	buf := bytes.Buffer{}
 	buf.WriteString("UPDATE " + t.name + " SET")
 
@@ -144,19 +138,19 @@ func (t *Table) makeUpdateQuery() {
 	t.updateQuery = buf.String()
 }
 
-func (t *Table) makeDeleteQuery() {
+func (t *ORMTable) makeDeleteQuery() {
 	t.deleteQuery = "DELETE FROM " + t.name + " WHERE id = ?"
 }
 
-func (t *Table) FindById(i interface{}, id int64) error {
+func (t *ORMTable) FindById(i interface{}, id int64) error {
 	return t.FindOne(i, "id = ?", id)
 }
 
-func (t *Table) FindAll(i interface{}) error {
+func (t *ORMTable) FindAll(i interface{}) error {
 	return t.Find(i, "")
 }
 
-func (t *Table) Find(i interface{}, where string, args... interface{}) error {
+func (t *ORMTable) Find(i interface{}, where string, args... interface{}) error {
 	t.ensureType(i)
 
 	q := "SELECT * FROM " + t.name
@@ -171,14 +165,14 @@ func (t *Table) Find(i interface{}, where string, args... interface{}) error {
 	return t.read(i, ret)
 }
 
-func (t *Table) ensureType(i interface{}) {
+func (t *ORMTable) ensureType(i interface{}) {
 	k := reflect.TypeOf(i).Kind()
 	if k != reflect.Ptr {
 		panic("parameter must be pointer")
 	}
 }
 
-func (t *Table) FindOne(i interface{}, where string, args... interface{}) error {
+func (t *ORMTable) FindOne(i interface{}, where string, args... interface{}) error {
 	err := t.Find(i, where, args...)
 	if err != nil {
 		return err
@@ -186,7 +180,7 @@ func (t *Table) FindOne(i interface{}, where string, args... interface{}) error 
 	return nil
 }
 
-func (t *Table) Insert(i interface{}) (int64, error) {
+func (t *ORMTable) Insert(i interface{}) (int64, error) {
 	params := t.resolveParams(i)
 	ret, err := db.Exec(t.insertQuery, params...)
 	if err != nil {
@@ -195,7 +189,7 @@ func (t *Table) Insert(i interface{}) (int64, error) {
 	return ret.LastInsertId()
 }
 
-func (t *Table) Update(i interface{}) error {
+func (t *ORMTable) Update(i interface{}) error {
 	id := t.getId(i)
 	params := t.resolveParams(i)
 	params = append(params, id)
@@ -204,23 +198,23 @@ func (t *Table) Update(i interface{}) error {
 	return err
 }
 
-func (t *Table) Delete(id int64) error {
+func (t *ORMTable) Delete(id int64) error {
 	_, err := db.Exec(t.deleteQuery, id)
 	return err
 }
 
-func (t *Table) DeleteAll() error {
+func (t *ORMTable) DeleteAll() error {
 	_, err := db.Exec("TRUNCATE TABLE " + t.name)
 	return err
 }
 
-func (t *Table) getId(i interface{}) int64 {
+func (t *ORMTable) getId(i interface{}) int64 {
 	v := reflect.ValueOf(i).Elem()
 	f := v.FieldByName("Id")
 	return f.Int()
 }
 
-func (t *Table) resolveParams(i interface{}) []interface{} {
+func (t *ORMTable) resolveParams(i interface{}) []interface{} {
 	v := reflect.ValueOf(i).Elem()
 
 	fs := t.fields
@@ -232,7 +226,7 @@ func (t *Table) resolveParams(i interface{}) []interface{} {
 	return arr
 }
 
-func (t *Table) read(i interface{}, row *sql.Rows) error {
+func (t *ORMTable) read(i interface{}, row *sql.Rows) error {
 	arr := reflect.MakeSlice(reflect.SliceOf(t.entityType), 0, 20)
 	for row.Next() {
 		obj, err := t.readFromRow(row)
@@ -257,7 +251,7 @@ func (t *Table) read(i interface{}, row *sql.Rows) error {
 	return nil
 }
 
-func (t *Table) readFromRow(row *sql.Rows) (interface{}, error){
+func (t *ORMTable) readFromRow(row *sql.Rows) (interface{}, error){
 	obj := reflect.New(t.entityType).Interface()
 	v := reflect.ValueOf(obj).Elem()
 

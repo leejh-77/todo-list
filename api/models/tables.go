@@ -5,16 +5,18 @@ import (
 	"todo-list/orm"
 )
 
-var Users userTable
-var Todos todoTable
-var Workspaces workspaceTable
-var WorkspaceMembers workspaceMemberTable
+const (
+	tUser = "users"
+	tTodo = "todos"
+	tWorkspace = "workspaces"
+	tWorkspaceMembers = "workspaceMembers"
+)
 
 func init() {
 	orm.Init(base.DBConfig)
 
-	Users = userTable{orm.NewTable("users", User{})}
-	Todos = todoTable{orm.NewTable("todos", Todo{})}
-	Workspaces = workspaceTable{orm.NewTable("workspaces", Workspace{})}
-	WorkspaceMembers = workspaceMemberTable{orm.NewTable("workspaceMembers", WorkspaceMember{})}
+	orm.Register(tUser, User{})
+	orm.Register(tTodo, Todo{})
+	orm.Register(tWorkspace, Workspace{})
+	orm.Register(tWorkspaceMembers, WorkspaceMember{})
 }
