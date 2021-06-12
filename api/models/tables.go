@@ -6,17 +6,27 @@ import (
 )
 
 const (
-	tUser = "users"
-	tTodo = "todos"
-	tWorkspace = "workspaces"
-	tWorkspaceMembers = "workspaceMembers"
+	TableUser             = "users"
+	TableTodo             = "todos"
+	TableWorkspace        = "workspaces"
+	TableWorkspaceMembers = "workspaceMembers"
 )
+
+var Users *userTable
+var Todos *todoTable
+var Workspaces *workspaceTable
+var WorkspaceMembers *workspaceMemberTable
 
 func init() {
 	orm.Init(base.DBConfig)
 
-	orm.Register(tUser, User{})
-	orm.Register(tTodo, Todo{})
-	orm.Register(tWorkspace, Workspace{})
-	orm.Register(tWorkspaceMembers, WorkspaceMember{})
+	orm.Register(TableUser, User{})
+	orm.Register(TableTodo, Todo{})
+	orm.Register(TableWorkspace, Workspace{})
+	orm.Register(TableWorkspaceMembers, WorkspaceMember{})
+
+	Users = &userTable{orm.Table(TableUser)}
+	Todos = &todoTable{orm.Table(TableTodo)}
+	Workspaces = &workspaceTable{orm.Table(TableWorkspace)}
+	WorkspaceMembers = &workspaceMemberTable{orm.Table(TableWorkspaceMembers)}
 }

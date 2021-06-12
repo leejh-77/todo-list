@@ -121,12 +121,21 @@ func typeString(p reflect.Type) string {
 	return "BLOB"
 }
 
-func Session() Engine {
+type TransactionFunc func(Engine) error
+
+func InTransaction(fn TransactionFunc) error {
 	tx, err := global.db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &TransactionalEngine{
+	e := &TransactionalEngine{
 		db: tx,
 	}
+	err = fn(e)
+	if err != nil {
+		err = tx.Rollback()
+	} else {
+		err = tx.Commit()
+	}
+	return err
 }

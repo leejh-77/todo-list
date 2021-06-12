@@ -17,9 +17,3 @@ type WorkspaceMember struct {
 type workspaceMemberTable struct {
 	*orm.ORMTable
 }
-
-func WorkspaceMemberTable() *workspaceMemberTable {
-	return &workspaceMemberTable{
-		orm.Table(tWorkspaceMembers),
-	}
-}

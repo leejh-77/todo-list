@@ -23,8 +23,3 @@ type todoTable struct {
 	*orm.ORMTable
 }
 
-func TodoTable() *todoTable {
-	return &todoTable{
-		orm.Table(tTodo),
-	}
-}

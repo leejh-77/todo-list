@@ -45,7 +45,7 @@ func TestSignUp_password_encrypt(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
 	var user models.User
-	err := models.UserTable.FindByEmailAddress(&user, email)
+	err := models.Users.FindByEmailAddress(&user, email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestLogin_valid(t *testing.T) {
 		EmailAddress: email,
 		Password: password,
 	}
-	ctx := dummyContext()
+	ctx := createDummyContext()
 	ctx.Set("command", c)
 	ret = LogIn(ctx)
 
@@ -83,7 +83,7 @@ func TestLogin_should_fail(t *testing.T) {
 		Password: password + "1",
 	}
 
-	ctx := dummyContext()
+	ctx := createDummyContext()
 	ctx.Set("command", c)
 	ret = LogIn(ctx)
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
@@ -96,7 +96,7 @@ func signUpTestUser(email string, password string, username string) *result.ApiR
 	c.Password = password
 	c.Username = username
 
-	ctx := dummyContext()
+	ctx := createDummyContext()
 	ctx.Set("command", c)
 	return SignUp(ctx)
 }

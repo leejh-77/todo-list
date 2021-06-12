@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"time"
 	"todo-list/models"
+	"todo-list/orm"
 	"todo-list/result"
 )
 
@@ -17,24 +18,37 @@ func CreateWorkspace(ctx echo.Context) *result.ApiResult {
 	if len(c.Name) == 0 {
 		return result.BadRequest("name must not be empty")
 	}
-	ws := &models.Workspace{
-		Name:        c.Name,
-		CreatedTime: time.Now().Unix(),
-	}
-	id, err := models.Workspaces.Insert(ws)
-	if err != nil {
-		return result.ServerError(err)
-	}
+
 	t := ctx.Get("user").(*jwt.Token)
 	claims := t.Claims.(jwt.MapClaims)
 	uid := claims["uid"].(int64)
 
-	m := &models.WorkspaceMember{
-		Type:        models.MemberTypeOwner,
-		WorkspaceId: id,
-		UserId:      uid,
+	var trError error
+	err := orm.InTransaction(func(e orm.Engine) error {
+		ws := &models.Workspace{
+			Name:        c.Name,
+			CreatedTime: time.Now().Unix(),
+		}
+		id, err := e.Table(models.TableWorkspace).Insert(ws)
+		if err != nil {
+			trError = err
+			return err
+		}
+		m := &models.WorkspaceMember{
+			Type:        models.MemberTypeOwner,
+			WorkspaceId: id,
+			UserId:      uid,
+		}
+		_, err = e.Table(models.TableWorkspaceMembers).Insert(m)
+		if err != nil {
+			trError = err
+			return err
+		}
+		return nil
+	})
+	if trError != nil {
+		return result.ServerError(trError)
 	}
-	_, err = models.WorkspaceMembers.Insert(m)
 	if err != nil {
 		return result.ServerError(err)
 	}

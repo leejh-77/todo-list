@@ -39,7 +39,7 @@ func SignUp(ctx echo.Context) *result.ApiResult {
 	user.Username = c.Username
 	user.RegisteredTime = time.Now().Unix()
 
-	_, err = models.UserTable.Insert(user)
+	_, err = models.Users.Insert(user)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -50,7 +50,7 @@ func LogIn(ctx echo.Context) *result.ApiResult {
 	c := ctx.Get("command").(LogInCommand)
 
 	var user models.User
-	err := models.UserTable.FindByEmailAddress(&user, c.EmailAddress)
+	err := models.Users.FindByEmailAddress(&user, c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}
