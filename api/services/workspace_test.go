@@ -24,7 +24,7 @@ func TestCreateWorkspace(t *testing.T) {
 	assert.NotEqual(t, 0, len(workspaces))
 }
 
-func TestCreateWorkspace_invalidName(t *testing.T) {
+func TestCreateWorkspace_invalidName_shouldFail(t *testing.T) {
 	c := CreateWorkspaceCommand{
 		Name: "",
 	}
@@ -35,7 +35,13 @@ func TestCreateWorkspace_invalidName(t *testing.T) {
 }
 
 func TestDeleteWorkspace(t *testing.T) {
-	w := models.TestWorkspace()
-	DeleteWorkspace(models.TestUser().Id, w.Id)
-}
+	clearTables()
 
+	u := models.TestUser()
+	w := models.TestWorkspace()
+	DeleteWorkspace(u.Id, w.Id)
+
+	ret := GetWorkspaces(u.Id)
+	ws := ret.Result.([]models.Workspace)
+	assert.Equal(t, 0, len(ws))
+}

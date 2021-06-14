@@ -9,7 +9,7 @@ import (
 	"todo-list/test"
 )
 
-func TestSignup_valid(t *testing.T) {
+func TestSignup(t *testing.T) {
 	ret := signUpTestUser(
 		test.UniqueString("jonghoon.lee@gmail.com"),
 		"pasworkd@@#",
@@ -17,7 +17,7 @@ func TestSignup_valid(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 }
 
-func TestSignup_invalid_email(t *testing.T) {
+func TestSignup_invalidEmail_shouldFail(t *testing.T) {
 	ret := signUpTestUser(
 		"jonghoon.lee",
 		"pasword@!@!",
@@ -25,7 +25,7 @@ func TestSignup_invalid_email(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
-func TestSignup_invalid_password(t *testing.T) {
+func TestSignup_invalidPassword_shouldFail(t *testing.T) {
 	ret := signUpTestUser(
 		"jonghoon.lee@gmail.com",
 		"sss",
@@ -33,7 +33,7 @@ func TestSignup_invalid_password(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
-func TestSignUp_password_encrypt(t *testing.T) {
+func TestSignUp_passwordEncrypt(t *testing.T) {
 	email := test.UniqueString("jonghoon.lee@gmail.com")
 	password := "password@!@"
 
@@ -52,7 +52,7 @@ func TestSignUp_password_encrypt(t *testing.T) {
 	assert.NotEqual(t, user.Password, password)
 }
 
-func TestLogin_valid(t *testing.T) {
+func TestLogin(t *testing.T) {
 	email, password := test.UniqueString("test.user@gmail.com"), "password"
 	ret := signUpTestUser(email, password, "Test User")
 
@@ -71,7 +71,7 @@ func TestLogin_valid(t *testing.T) {
 	assert.NotNil(t, token)
 }
 
-func TestLogin_should_fail(t *testing.T) {
+func TestLogin_invalidPassword_shouldFail(t *testing.T) {
 	email, password := "test.user@gmail.com", "password"
 	ret := signUpTestUser(email, password, "Test User")
 

@@ -21,5 +21,15 @@ func TestCreateFolder(t *testing.T) {
 }
 
 func TestDeleteFolder(t *testing.T) {
+	clearTables()
 
+	u := models.TestUser()
+	f := models.TestFolder()
+
+	DeleteFolder(u.Id, f.Id)
+
+	ret := GetFolders(u.Id, models.TestWorkspace().Id)
+	fs := ret.Result.([]models.Folder)
+
+	assert.Equal(t, 0, len(fs))
 }

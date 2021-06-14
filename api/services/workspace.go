@@ -26,7 +26,7 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
-	err = createWorkspaceAndAddMember(c, uid)
+	err = createWorkspace(c, uid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -46,11 +46,7 @@ func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 		return result.BadRequest("user does not have permission to delete workspace")
 	}
 	err = orm.InTransaction(func(e orm.Engine) error {
-		err = e.Table(models.TableWorkspace).DeleteById(wid)
-		if err != nil {
-			return err
-		}
-		return e.Table(models.TableWorkspaceMember).Delete("workspaceId = ?", wid)
+		return deleteWorkspace(wid, e)
 	})
 	if err != nil {
 		return result.ServerError(err)
@@ -65,7 +61,7 @@ func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
 	return nil
 }
 
-func createWorkspaceAndAddMember(c CreateWorkspaceCommand, uid int64) error {
+func createWorkspace(c CreateWorkspaceCommand, uid int64) error {
 	return orm.InTransaction(func(e orm.Engine) error {
 		ws := &models.Workspace{
 			Name:        c.Name,
@@ -86,4 +82,16 @@ func createWorkspaceAndAddMember(c CreateWorkspaceCommand, uid int64) error {
 		}
 		return nil
 	})
+}
+
+func deleteWorkspace(wid int64, e orm.Engine) error {
+	err := e.Table(models.TableWorkspace).DeleteById(wid)
+	if err != nil {
+		return err
+	}
+	err = e.Table(models.TableWorkspaceMember).Delete("workspaceId = ?", wid)
+	if err != nil {
+		return err
+	}
+	return nil
 }

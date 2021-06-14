@@ -137,7 +137,7 @@ func (t *ORMTable) Update(i interface{}) error {
 func (t *ORMTable) Delete(where string, i... interface{}) error {
 	q := "DELETE FROM " + t.info.name
 	if len(where) > 0 {
-		q = q + "WHERE " + where
+		q = q + " WHERE " + where
 	}
 	_, err := t.engine.Exec(q, i...)
 	return err

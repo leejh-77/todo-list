@@ -132,10 +132,10 @@ func InTransaction(fn TransactionFunc) error {
 		db: tx,
 	}
 	err = fn(e)
-	if err != nil {
-		err = tx.Rollback()
-	} else {
+	if err == nil {
 		err = tx.Commit()
+	} else {
+		_ = tx.Rollback()
 	}
 	return err
 }

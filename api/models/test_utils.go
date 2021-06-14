@@ -52,5 +52,28 @@ func TestWorkspace() *Workspace {
 		log.Fatal(err)
 	}
 	w.Id = id
+	m := WorkspaceMember{
+		Type:        MemberTypeOwner,
+		WorkspaceId: w.Id,
+		UserId:      user.Id,
+	}
+	id, err = WorkspaceMembers.Insert(&m)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &w
+}
+
+func TestFolder() *Folder {
+	w := TestWorkspace()
+	f := &Folder{
+		Name: "test.folder",
+		WorkspaceId: w.Id,
+	}
+	id, err := Folders.Insert(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.Id = id
+	return f
 }
