@@ -1,6 +1,9 @@
 package result
 
-import "net/http"
+import (
+	"github.com/labstack/echo/v4"
+	"net/http"
+)
 
 type ApiResult struct {
 	Result interface{} `json:"result"`
@@ -45,6 +48,15 @@ func BadRequest(message string) *ApiResult {
 	}
 }
 
+func Unauthorized(message string) *ApiResult {
+	return &ApiResult{
+		StatusCode: http.StatusUnauthorized,
+		Error:      &ApiError{
+			Message: message,
+		},
+	}
+}
+
 func ServerError(err error) *ApiResult {
 	return &ApiResult{
 		StatusCode: http.StatusInternalServerError,
@@ -53,5 +65,13 @@ func ServerError(err error) *ApiResult {
 			Error: err,
 		},
 	}
+}
+
+func (ret *ApiResult) Send(ctx echo.Context) error {
+	err := ret.Error
+	if err != nil && err.Error != nil {
+		return err.Error
+	}
+	return ctx.JSON(ret.StatusCode, ret.Result)
 }
 

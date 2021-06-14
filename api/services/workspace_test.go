@@ -9,39 +9,33 @@ import (
 
 
 func TestCreateWorkspace(t *testing.T) {
-	_ = models.Workspaces.DeleteAll()
-	_ = models.WorkspaceMembers.DeleteAll()
+	clearTables()
 
-	u := testUser()
-	e := createAuthorizedContext(u)
-
+	uid := models.TestUser().Id
 	c := CreateWorkspaceCommand{
 		Name: "Test Workspace",
 	}
-	e.Set("command", c)
-	ret := CreateWorkspace(e)
+	ret := CreateWorkspace(uid, c)
 
 	assert.Equal(t, 201, ret.StatusCode)
+	ret = GetWorkspaces(uid)
 
-	var member models.WorkspaceMember
-	err := models.WorkspaceMembers.Find(&member, "userId = ?", u.Id)
-	if err != nil {
-		t.Error(err)
-	}
-	assert.NotNil(t, member)
-	assert.Equal(t, member.Type, models.MemberTypeOwner)
+	workspaces := ret.Result.([]models.Workspace)
+	assert.NotEqual(t, 0, len(workspaces))
 }
 
 func TestCreateWorkspace_invalidName(t *testing.T) {
-	e := createAuthorizedContext(testUser())
-
 	c := CreateWorkspaceCommand{
 		Name: "",
 	}
-	e.Set("command", c)
-	ret := CreateWorkspace(e)
+	ret := CreateWorkspace(models.TestUser().Id, c)
 
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 	assert.Equal(t, "name must not be empty", ret.Error.Message)
+}
+
+func TestDeleteWorkspace(t *testing.T) {
+	w := models.TestWorkspace()
+	DeleteWorkspace(models.TestUser().Id, w.Id)
 }
 

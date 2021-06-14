@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
 	"todo-list/models"
 	"todo-list/result"
 )
@@ -16,8 +15,7 @@ type CreateTodoCommand struct {
 	CompletedTime int64
 }
 
-func CreateTodo(cxt echo.Context) *result.ApiResult {
-	c := cxt.Get("command").(CreateTodoCommand)
+func CreateTodo(c CreateTodoCommand) *result.ApiResult {
 	err := validateCreateCommand(c)
 	if err != nil {
 		return result.BadRequest(err.Error())

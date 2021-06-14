@@ -10,9 +10,14 @@ type TodoController struct {
 }
 
 func (c TodoController) Init(g *echo.Group) {
-	g.POST("", createTodo, withCommand(services.CreateTodoCommand{}))
+	g.POST("", createTodo)
 }
 
-func createTodo(cxt echo.Context) error {
-	return send(cxt, services.CreateTodo(cxt))
+func createTodo(ctx echo.Context) error {
+	c := services.CreateTodoCommand{}
+	err := ctx.Bind(&c)
+	if err != nil {
+		return err
+	}
+	return services.CreateTodo(c).Send(ctx)
 }

@@ -134,7 +134,16 @@ func (t *ORMTable) Update(i interface{}) error {
 	return err
 }
 
-func (t *ORMTable) Delete(id int64) error {
+func (t *ORMTable) Delete(where string, i... interface{}) error {
+	q := "DELETE FROM " + t.info.name
+	if len(where) > 0 {
+		q = q + "WHERE " + where
+	}
+	_, err := t.engine.Exec(q, i...)
+	return err
+}
+
+func (t *ORMTable) DeleteById(id int64) error {
 	_, err := t.engine.Exec(t.info.deleteQuery, id)
 	return err
 }

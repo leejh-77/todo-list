@@ -2,9 +2,7 @@ package models
 
 import (
 	"github.com/stretchr/testify/assert"
-	"log"
 	"testing"
-	"time"
 )
 
 
@@ -43,7 +41,7 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestDeleteTodo(t *testing.T) {
 	todo := createTestTodo()
-	err := Todos.Delete(todo.Id)
+	err := Todos.DeleteById(todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +54,7 @@ func TestDeleteTodo(t *testing.T) {
 
 func makeTodo(subject string) *Todo {
 	todo := new(Todo)
-	todo.UserId = testUser().Id
+	todo.UserId = TestUser().Id
 	todo.Subject = subject
 	todo.Body = "Test Todo Body"
 	todo.Status = TodoStatusNotStarted
@@ -74,26 +72,4 @@ func createTestTodo() *Todo {
 		return nil
 	}
 	return todo
-}
-
-func testUser() *User {
-	email := "todo.test.user@gmail.com"
-
-	var u User
-	_ = Users.FindByEmailAddress(&u, email)
-	if u.Id > 0 {
-		return &u
-	}
-	u = User{
-		EmailAddress:   email,
-		Password:       "password!@#$",
-		Username:       "Jonghoon Lee",
-		RegisteredTime: time.Now().Unix(),
-	}
-	id, err := Users.Insert(&u)
-	if err != nil {
-		log.Fatal(err)
-	}
-	u.Id = id
-	return &u
 }

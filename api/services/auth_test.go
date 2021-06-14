@@ -63,8 +63,7 @@ func TestLogin_valid(t *testing.T) {
 		Password: password,
 	}
 	ctx := createDummyContext()
-	ctx.Set("command", c)
-	ret = LogIn(ctx)
+	ret = LogIn(ctx, c)
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
 
@@ -82,10 +81,8 @@ func TestLogin_should_fail(t *testing.T) {
 		EmailAddress: email,
 		Password: password + "1",
 	}
-
 	ctx := createDummyContext()
-	ctx.Set("command", c)
-	ret = LogIn(ctx)
+	ret = LogIn(ctx, c)
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
@@ -95,8 +92,5 @@ func signUpTestUser(email string, password string, username string) *result.ApiR
 	c.EmailAddress = email
 	c.Password = password
 	c.Username = username
-
-	ctx := createDummyContext()
-	ctx.Set("command", c)
-	return SignUp(ctx)
+	return SignUp(c)
 }

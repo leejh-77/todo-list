@@ -22,9 +22,7 @@ type LogInCommand struct {
 	Password     string `json:"password"`
 }
 
-func SignUp(ctx echo.Context) *result.ApiResult {
-	c := ctx.Get("command").(SignUpCommand)
-
+func SignUp(c SignUpCommand) *result.ApiResult {
 	err := validateSignupRequest(c)
 	if err != nil {
 		return result.BadRequest(err.Error())
@@ -46,9 +44,7 @@ func SignUp(ctx echo.Context) *result.ApiResult {
 	return result.Created()
 }
 
-func LogIn(ctx echo.Context) *result.ApiResult {
-	c := ctx.Get("command").(LogInCommand)
-
+func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	var user models.User
 	err := models.Users.FindByEmailAddress(&user, c.EmailAddress)
 	if err != nil {

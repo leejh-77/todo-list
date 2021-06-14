@@ -68,7 +68,7 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = Table(tBook).Delete(id)
+	err = Table(tBook).DeleteById(id)
 	if err != nil {
 		t.Fatal(err)
 	}

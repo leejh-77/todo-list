@@ -3,17 +3,27 @@ package services
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http/httptest"
-	"time"
 	"todo-list/models"
 )
 
-func createDummyContext() echo.Context {
-	return createAuthorizedContext(nil)
+func clearTables() {
+	_ = models.Folders.DeleteAll()
+	_ = models.Todos.DeleteAll()
+	_ = models.Users.DeleteAll()
+	_ = models.Workspaces.DeleteAll()
+	_ = models.WorkspaceMembers.DeleteAll()
 }
 
-func createAuthorizedContext(user *models.User) echo.Context {
+func createDummyContext() echo.Context {
+	return createContext(nil)
+}
+
+func createAuthorizedContext() echo.Context {
+	return createContext(models.TestUser())
+}
+
+func createContext(user *models.User) echo.Context {
 	e := echo.New()
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	rec := httptest.NewRecorder()
@@ -26,29 +36,4 @@ func createAuthorizedContext(user *models.User) echo.Context {
 		ctx.Set("user", t)
 	}
 	return ctx
-}
-
-func testUser() *models.User {
-	email := "test.user@gmail.com"
-
-	var user models.User
-	err := models.Users.FindByEmailAddress(&user, email)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if user.Id != int64(0) {
-		return &user
-	}
-	user = models.User{
-		EmailAddress:   email,
-		Password:       "paswordl:!@@",
-		Username:       "Jonghoon",
-		RegisteredTime: time.Now().Unix(),
-	}
-	id, err := models.Users.Insert(&user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	user.Id = id
-	return &user
 }

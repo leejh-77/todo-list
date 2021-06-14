@@ -2,8 +2,6 @@ package services
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo/v4"
 	"time"
 	"todo-list/models"
 	"todo-list/orm"
@@ -14,22 +12,50 @@ type CreateWorkspaceCommand struct {
 	Name string
 }
 
-func CreateWorkspace(ctx echo.Context) *result.ApiResult {
-	c := ctx.Get("command").(CreateWorkspaceCommand)
+func GetWorkspaces(uid int64) *result.ApiResult {
+	var workspaces []models.Workspace
+	err := models.Workspaces.FindParticipatingWorkspaces(&workspaces, uid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(workspaces)
+}
+
+func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	err := validateCreateWorkspaceCommand(c)
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
-
-	t := ctx.Get("user").(*jwt.Token)
-	claims := t.Claims.(jwt.MapClaims)
-	uid := claims["uid"].(int64)
-
 	err = createWorkspaceAndAddMember(c, uid)
 	if err != nil {
 		return result.ServerError(err)
 	}
 	return result.Created()
+}
+
+func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
+	var m models.WorkspaceMember
+	err := models.WorkspaceMembers.FindByUserIdAndWorkspaceId(&m, uid, wid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	if m.Id == int64(0) {
+		return result.BadRequest("user is not participating in this workspace")
+	}
+	if m.Type != models.MemberTypeOwner {
+		return result.BadRequest("user does not have permission to delete workspace")
+	}
+	err = orm.InTransaction(func(e orm.Engine) error {
+		err = e.Table(models.TableWorkspace).DeleteById(wid)
+		if err != nil {
+			return err
+		}
+		return e.Table(models.TableWorkspaceMember).Delete("workspaceId = ?", wid)
+	})
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(nil)
 }
 
 func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
@@ -54,7 +80,7 @@ func createWorkspaceAndAddMember(c CreateWorkspaceCommand, uid int64) error {
 			WorkspaceId: id,
 			UserId:      uid,
 		}
-		_, err = e.Table(models.TableWorkspaceMembers).Insert(m)
+		_, err = e.Table(models.TableWorkspaceMember).Insert(m)
 		if err != nil {
 			return err
 		}
