@@ -25,7 +25,7 @@ func TestFindUserByEmailAddress(t *testing.T) {
 		t.Fatal(err)
 	}
 	u := &User{}
-	err = UserTable().FindByEmailAddress(u, email)
+	err = Users.FindByEmailAddress(u, email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestFindUserById(t *testing.T) {
 	}
 
 	u := &User{}
-	err = UserTable().FindById(u, id)
+	err = Users.FindById(u, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,6 +54,6 @@ func createUser(email string) (int64, error) {
 	user.Password = "passwod@!!"
 	user.Username = "Jonghoon Lee"
 	user.RegisteredTime = time.Now().Unix()
-	return UserTable().Insert(user)
+	return Users.Insert(user)
 }
 
