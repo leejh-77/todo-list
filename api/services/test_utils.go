@@ -48,7 +48,7 @@ func TestUser() *models.User {
 
 func createTestUser(email string) *models.User {
 	var u models.User
-	_ = orm.Table(models.TableUser).Find(&u, "emailAddress = ?", email)
+	_ = models.UserQuery(orm.Engine).FindByEmailAddress(&u, email)
 	if u.Id > 0 {
 		return &u
 	}

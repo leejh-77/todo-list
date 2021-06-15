@@ -14,7 +14,7 @@ type GetUserResponseData struct {
 
 func GetWorkspaceMembers(uid int64, wid int64) *result.ApiResult {
 	var ms []models.WorkspaceMember
-	err := orm.Table(models.TableWorkspaceMember).Find(&ms, "workspaceId = ?", wid)
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByWorkspaceId(&ms, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -35,8 +35,7 @@ func GetWorkspaceMembers(uid int64, wid int64) *result.ApiResult {
 	}
 
 	var us []models.User
-	err = orm.Table(models.TableUser).Find(&us,
-		"id IN (SELECT userId FROM workspaceMembers WHERE workspaceId = ?)", wid)
+	err = models.UserQuery(orm.Engine).FindByWorkspace(&us, wid)
 
 	res := make([]GetUserResponseData, 0, 10)
 	for _, u := range us {
@@ -80,7 +79,7 @@ func DeleteWorkspaceMember(uid int64, wid int64) *result.ApiResult {
 	if m.Id == int64(0) {
 		return result.BadRequest("user is not a member of the workspace")
 	}
-	err = orm.InTransaction(func(e orm.Engine) error {
+	err = orm.InTransaction(func(e orm.Session) error {
 		return deleteWorkspaceMember(m.Id, wid, e)
 	})
 	if err != nil {
@@ -89,7 +88,7 @@ func DeleteWorkspaceMember(uid int64, wid int64) *result.ApiResult {
 	return result.Success(nil)
 }
 
-func deleteWorkspaceMember(mid int64, wid int64, e orm.Engine) error {
+func deleteWorkspaceMember(mid int64, wid int64, e orm.Session) error {
 	err := e.Table(models.TableWorkspaceMember).DeleteById(mid)
 	if err != nil {
 		return err

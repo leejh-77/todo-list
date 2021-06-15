@@ -26,7 +26,7 @@ func TestFindUserByEmailAddress(t *testing.T) {
 		t.Fatal(err)
 	}
 	u := &User{}
-	err = orm.Table(TableUser).Find(u, "emailAddress = ?", email)
+	err = UserQuery(orm.Engine).FindByEmailAddress(u,  email)
 	if err != nil {
 		t.Fatal(err)
 	}

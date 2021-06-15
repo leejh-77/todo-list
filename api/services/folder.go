@@ -67,7 +67,7 @@ func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 
 func checkWorkspaceAuthority(uid int64, wid int64) *result.ApiResult {
 	var m models.WorkspaceMember
-	err := orm.Table(models.TableWorkspaceMember).Find(&m, "userId = ? AND workspaceId = ?", uid, wid)
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndWorkspaceId(&m, uid, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}

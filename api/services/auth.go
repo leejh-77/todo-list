@@ -47,7 +47,7 @@ func SignUp(c SignUpCommand) *result.ApiResult {
 
 func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	var user models.User
-	err := orm.Table(models.TableUser).Find(&user, "emailAddress = ?", c.EmailAddress)
+	err := models.UserQuery(orm.Engine).FindByEmailAddress(&user, c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}

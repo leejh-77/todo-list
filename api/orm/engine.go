@@ -16,9 +16,9 @@ type DatabaseConfig struct {
 }
 
 var tableInfos = make(map[string]*TableInfo)
-var global *DefaultEngine
+var Engine *DefaultEngine
 
-type Engine interface {
+type Session interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	Table(name string) *ORMTable
@@ -45,7 +45,7 @@ func Init(c DatabaseConfig) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	global = &DefaultEngine{
+	Engine = &DefaultEngine{
 		db: i,
 	}
 }
@@ -81,7 +81,7 @@ func (e *TransactionalEngine) Table(name string) *ORMTable {
 }
 
 func Table(name string) *ORMTable {
-	return global.Table(name)
+	return Engine.Table(name)
 }
 
 func Register(name string, entity interface{}) {
@@ -108,7 +108,7 @@ func createTable(info *TableInfo) {
 	buf.WriteString(")")
 
 	query := buf.String()
-	_, err := global.Exec(query)
+	_, err := Engine.Exec(query)
 	if err != nil {
 		panic(err)
 	}
@@ -129,10 +129,10 @@ func typeString(p reflect.Type) string {
 	return "BLOB"
 }
 
-type TransactionFunc func(Engine) error
+type TransactionFunc func(Session) error
 
 func InTransaction(fn TransactionFunc) error {
-	tx, err := global.db.Begin()
+	tx, err := Engine.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func InTransaction(fn TransactionFunc) error {
 }
 
 func BeginTr() (*TransactionalEngine, error) {
-	tx, err := global.db.Begin()
+	tx, err := Engine.db.Begin()
 	if err != nil {
 		return nil, err
 	}

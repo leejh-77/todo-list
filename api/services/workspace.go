@@ -14,8 +14,7 @@ type CreateWorkspaceCommand struct {
 
 func GetWorkspaces(uid int64) *result.ApiResult {
 	var workspaces []models.Workspace
-	err := orm.Table(models.TableWorkspace).Find(&workspaces,
-		"id IN (SELECT workspaceId FROM workspaceMembers WHERE userId = ?)", uid)
+	err := models.WorkspaceQuery(orm.Engine).FindByUserId(&workspaces, uid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -27,7 +26,7 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
-	err = orm.InTransaction(func(e orm.Engine) error {
+	err = orm.InTransaction(func(e orm.Session) error {
 		return createWorkspace(c, uid, e)
 	})
 	if err != nil {
@@ -38,7 +37,7 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 
 func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 	var m models.WorkspaceMember
-	err := orm.Table(models.TableWorkspaceMember).Find(&m, "userId = ? AND workspaceId = ?", uid, wid)
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndWorkspaceId(&m, uid, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -48,7 +47,7 @@ func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 	if m.Type != models.MemberTypeOwner {
 		return result.BadRequest("user does not have permission to delete workspace")
 	}
-	err = orm.InTransaction(func(e orm.Engine) error {
+	err = orm.InTransaction(func(e orm.Session) error {
 		return deleteWorkspace(wid, e)
 	})
 	if err != nil {
@@ -64,7 +63,7 @@ func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
 	return nil
 }
 
-func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Engine) error {
+func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Session) error {
 	ws := &models.Workspace{
 		Name:        c.Name,
 		CreatedTime: time.Now().Unix(),
@@ -85,7 +84,7 @@ func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Engine) error {
 	return nil
 }
 
-func deleteWorkspace(wid int64, e orm.Engine) error {
+func deleteWorkspace(wid int64, e orm.Session) error {
 	err := e.Table(models.TableWorkspace).DeleteById(wid)
 	if err != nil {
 		return err

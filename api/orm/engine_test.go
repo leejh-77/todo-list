@@ -92,7 +92,7 @@ func TestFind(t *testing.T) {
 func TestTransaction(t *testing.T) {
 	_ = Table(tBook).DeleteAll()
 
-	InTransaction(func (e Engine) error {
+	InTransaction(func (e Session) error {
 		book := bookMock()
 		_, err := e.Table(tBook).Insert(book)
 		if err != nil {

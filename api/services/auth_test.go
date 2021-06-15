@@ -46,7 +46,7 @@ func TestSignUp_passwordEncrypt(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
 	var user models.User
-	err := orm.Table(models.TableUser).FindOne(&user, "emailAddress = ?", email)
+	err := models.UserQuery(orm.Engine).FindByEmailAddress(&user, email)
 	if err != nil {
 		t.Fatal(err)
 	}

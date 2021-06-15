@@ -19,8 +19,8 @@ type TableInfo struct {
 }
 
 type ORMTable struct {
-	engine Engine
-	info *TableInfo
+	engine Session
+	info   *TableInfo
 }
 
 func (t *TableInfo) init() {
