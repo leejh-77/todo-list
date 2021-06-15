@@ -14,7 +14,8 @@ type CreateWorkspaceCommand struct {
 
 func GetWorkspaces(uid int64) *result.ApiResult {
 	var workspaces []models.Workspace
-	err := models.Workspaces.FindParticipatingWorkspaces(&workspaces, uid)
+	err := orm.Table(models.TableWorkspace).Find(&workspaces,
+		"id IN (SELECT workspaceId FROM workspaceMembers WHERE userId = ?)", uid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -26,7 +27,9 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
-	err = createWorkspace(c, uid)
+	err = orm.InTransaction(func(e orm.Engine) error {
+		return createWorkspace(c, uid, e)
+	})
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -35,12 +38,12 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 
 func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 	var m models.WorkspaceMember
-	err := models.WorkspaceMembers.FindByUserIdAndWorkspaceId(&m, uid, wid)
+	err := orm.Table(models.TableWorkspaceMember).Find(&m, "userId = ? AND workspaceId = ?", uid, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}
 	if m.Id == int64(0) {
-		return result.BadRequest("user is not participating in this workspace")
+		return result.BadRequest("user is not a member of the workspace")
 	}
 	if m.Type != models.MemberTypeOwner {
 		return result.BadRequest("user does not have permission to delete workspace")
@@ -61,27 +64,25 @@ func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
 	return nil
 }
 
-func createWorkspace(c CreateWorkspaceCommand, uid int64) error {
-	return orm.InTransaction(func(e orm.Engine) error {
-		ws := &models.Workspace{
-			Name:        c.Name,
-			CreatedTime: time.Now().Unix(),
-		}
-		id, err := e.Table(models.TableWorkspace).Insert(ws)
-		if err != nil {
-			return err
-		}
-		m := &models.WorkspaceMember{
-			Type:        models.MemberTypeOwner,
-			WorkspaceId: id,
-			UserId:      uid,
-		}
-		_, err = e.Table(models.TableWorkspaceMember).Insert(m)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Engine) error {
+	ws := &models.Workspace{
+		Name:        c.Name,
+		CreatedTime: time.Now().Unix(),
+	}
+	id, err := e.Table(models.TableWorkspace).Insert(ws)
+	if err != nil {
+		return err
+	}
+	m := &models.WorkspaceMember{
+		Type:        models.MemberTypeOwner,
+		WorkspaceId: id,
+		UserId:      uid,
+	}
+	_, err = e.Table(models.TableWorkspaceMember).Insert(m)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func deleteWorkspace(wid int64, e orm.Engine) error {

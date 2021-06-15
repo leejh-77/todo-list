@@ -2,14 +2,16 @@ package services
 
 import (
 	"github.com/stretchr/testify/assert"
+	"net/http"
 	"testing"
 	"todo-list/models"
+	"todo-list/orm"
 )
 
-func TestGetWorkspaceMembers(t *testing.T) {
-	u := models.TestUser()
+func TestGetMembers(t *testing.T) {
+	u := TestUser()
 
-	w := models.TestWorkspace()
+	w := TestWorkspace()
 	ret := GetWorkspaceMembers(u.Id, w.Id)
 
 	data := ret.Result.([]GetUserResponseData)
@@ -21,9 +23,9 @@ func TestGetWorkspaceMembers(t *testing.T) {
 	assert.True(t, d.IsOwner)
 }
 
-func TestDeleteWorkspaceMember(t *testing.T) {
-	u := models.TestUser()
-	w := models.TestWorkspace()
+func TestDeleteMember(t *testing.T) {
+	u := TestUser()
+	w := TestWorkspace()
 
 	ret := DeleteWorkspaceMember(u.Id, w.Id)
 
@@ -35,13 +37,22 @@ func TestDeleteWorkspaceMember(t *testing.T) {
 	assert.Equal(t, 0, len(ws))
 }
 
-func TestDeleteWorkspaceMember_checkDeleteWhenZeroMembers(t *testing.T) {
-	u, w := models.TestUser(), models.TestWorkspace()
+func TestDeleteMember_notExist_shouldFail(t *testing.T) {
+	w := TestWorkspace()
+
+	ret := DeleteWorkspaceMember(w.Id, int64(93874)) // 존재하지 않는 user id
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user is not a member of the workspace", ret.Error.Message)
+}
+
+func TestDeleteMember_checkDeleteWorkspaceWhenZeroMembers(t *testing.T) {
+	u, w := TestUser(), TestWorkspace()
 
 	DeleteWorkspaceMember(u.Id, w.Id)
 
 	var found models.Workspace
-	err := models.Workspaces.FindById(&found, w.Id)
+	err := orm.Table(models.TableWorkspace).FindById(&found, w.Id)
 	if err != nil {
 		t.Fatal(err)
 	}

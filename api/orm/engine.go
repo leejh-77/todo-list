@@ -32,6 +32,14 @@ type TransactionalEngine struct {
 	db *sql.Tx
 }
 
+func (e *TransactionalEngine) Commit() error {
+	return e.db.Commit()
+}
+
+func (e *TransactionalEngine) Rollback() error {
+	return e.db.Rollback()
+}
+
 func Init(c DatabaseConfig) {
 	i, err := sql.Open(c.Driver, c.User + ":" + c.Password + "@tcp(" + c.Host + ")/" + c.Name)
 	if err != nil {
@@ -126,7 +134,7 @@ type TransactionFunc func(Engine) error
 func InTransaction(fn TransactionFunc) error {
 	tx, err := global.db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	e := &TransactionalEngine{
 		db: tx,
@@ -138,4 +146,15 @@ func InTransaction(fn TransactionFunc) error {
 		_ = tx.Rollback()
 	}
 	return err
+}
+
+func BeginTr() (*TransactionalEngine, error) {
+	tx, err := global.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	e := &TransactionalEngine{
+		db: tx,
+	}
+	return e, nil
 }

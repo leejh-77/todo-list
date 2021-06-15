@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"time"
 	"todo-list/models"
+	"todo-list/orm"
 	"todo-list/result"
 )
 
@@ -37,7 +38,7 @@ func SignUp(c SignUpCommand) *result.ApiResult {
 	user.Username = c.Username
 	user.RegisteredTime = time.Now().Unix()
 
-	_, err = models.Users.Insert(user)
+	_, err = orm.Table(models.TableUser).Insert(user)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -46,7 +47,7 @@ func SignUp(c SignUpCommand) *result.ApiResult {
 
 func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	var user models.User
-	err := models.Users.FindByEmailAddress(&user, c.EmailAddress)
+	err := orm.Table(models.TableUser).Find(&user, "emailAddress = ?", c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}

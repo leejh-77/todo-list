@@ -1,7 +1,5 @@
 package models
 
-import "todo-list/orm"
-
 const (
 	TodoStatusNotStarted = 0
 	TodoStatusInProgress = 1
@@ -18,8 +16,3 @@ type Todo struct {
 	CompletedTime int64
 	Position int
 }
-
-type todoTable struct {
-	*orm.ORMTable
-}
-

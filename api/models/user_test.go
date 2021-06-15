@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+	"todo-list/orm"
 	"todo-list/test"
 )
 
@@ -25,7 +26,7 @@ func TestFindUserByEmailAddress(t *testing.T) {
 		t.Fatal(err)
 	}
 	u := &User{}
-	err = Users.FindByEmailAddress(u, email)
+	err = orm.Table(TableUser).Find(u, "emailAddress = ?", email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +42,7 @@ func TestFindUserById(t *testing.T) {
 	}
 
 	u := &User{}
-	err = Users.FindById(u, id)
+	err = orm.Table(TableUser).FindById(u, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,6 +55,6 @@ func createUser(email string) (int64, error) {
 	user.Password = "passwod@!!"
 	user.Username = "Jonghoon Lee"
 	user.RegisteredTime = time.Now().Unix()
-	return Users.Insert(user)
+	return orm.Table(TableUser).Insert(user)
 }
 

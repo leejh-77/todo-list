@@ -2,6 +2,7 @@ package services
 
 import (
 	"todo-list/models"
+	"todo-list/orm"
 	"todo-list/result"
 )
 
@@ -16,7 +17,7 @@ func GetFolders(uid int64, wid int64) *result.ApiResult {
 		return ret
 	}
 	var fs []models.Folder
-	err := models.Folders.FindByWorkspaceId(&fs, wid)
+	err := orm.Table(models.TableFolder).Find(&fs, "workspaceId = ?", wid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -28,12 +29,11 @@ func CreateFolder(uid int64, c CreateFolderCommand) *result.ApiResult {
 	if ret != nil {
 		return ret
 	}
-
 	f := models.Folder{
 		Name:        c.Name,
 		WorkspaceId: c.WorkspaceId,
 	}
-	_, err := models.Folders.Insert(&f)
+	_, err := orm.Table(models.TableFolder).Insert(&f)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -42,7 +42,7 @@ func CreateFolder(uid int64, c CreateFolderCommand) *result.ApiResult {
 
 func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 	var f models.Folder
-	err := models.Folders.FindById(&f, fid)
+	err := orm.Table(models.TableFolder).FindById(&f, fid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -50,7 +50,7 @@ func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 		return result.BadRequest("folder does not exist")
 	}
 	var w models.Workspace
-	err = models.Workspaces.FindById(&w, f.WorkspaceId)
+	err = orm.Table(models.TableWorkspace).FindById(&w, f.WorkspaceId)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -58,7 +58,7 @@ func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 	if ret != nil {
 		return ret
 	}
-	err = models.Folders.DeleteById(fid)
+	err = orm.Table(models.TableWorkspace).DeleteById(fid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -67,7 +67,7 @@ func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 
 func checkWorkspaceAuthority(uid int64, wid int64) *result.ApiResult {
 	var m models.WorkspaceMember
-	err := models.WorkspaceMembers.FindByUserIdAndWorkspaceId(&m, uid, wid)
+	err := orm.Table(models.TableWorkspaceMember).Find(&m, "userId = ? AND workspaceId = ?", uid, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}

@@ -11,7 +11,7 @@ import (
 func TestCreateWorkspace(t *testing.T) {
 	clearTables()
 
-	uid := models.TestUser().Id
+	uid := TestUser().Id
 	c := CreateWorkspaceCommand{
 		Name: "Test Workspace",
 	}
@@ -28,7 +28,7 @@ func TestCreateWorkspace_invalidName_shouldFail(t *testing.T) {
 	c := CreateWorkspaceCommand{
 		Name: "",
 	}
-	ret := CreateWorkspace(models.TestUser().Id, c)
+	ret := CreateWorkspace(TestUser().Id, c)
 
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 	assert.Equal(t, "name must not be empty", ret.Error.Message)
@@ -37,11 +37,27 @@ func TestCreateWorkspace_invalidName_shouldFail(t *testing.T) {
 func TestDeleteWorkspace(t *testing.T) {
 	clearTables()
 
-	u := models.TestUser()
-	w := models.TestWorkspace()
+	u, w := TestUser(), TestWorkspace()
 	DeleteWorkspace(u.Id, w.Id)
 
 	ret := GetWorkspaces(u.Id)
 	ws := ret.Result.([]models.Workspace)
 	assert.Equal(t, 0, len(ws))
+}
+
+func TestDeleteWorkspace_notMember_shouldFail(t *testing.T) {
+	w := TestWorkspace()
+	u := createTestUser("another.user@email.com")
+
+	ret := DeleteWorkspace(u.Id, w.Id)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user is not a member of the workspace", ret.Error.Message)
+}
+
+func TestDeleteWorkspace_permissionDenied_shouldFail(t *testing.T) {
+	//w := TestWorkspace()
+	//u := createTestUser("another.user@email.com")
+
+	//ret := DeleteWorkspace(u.Id, w.Id)
 }

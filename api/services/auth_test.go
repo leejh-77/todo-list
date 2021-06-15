@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 	"todo-list/models"
+	"todo-list/orm"
 	"todo-list/result"
 	"todo-list/test"
 )
@@ -45,7 +46,7 @@ func TestSignUp_passwordEncrypt(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
 	var user models.User
-	err := models.Users.FindByEmailAddress(&user, email)
+	err := orm.Table(models.TableUser).FindOne(&user, "emailAddress = ?", email)
 	if err != nil {
 		t.Fatal(err)
 	}

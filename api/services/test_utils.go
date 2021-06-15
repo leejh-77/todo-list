@@ -3,16 +3,19 @@ package services
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http/httptest"
+	"time"
 	"todo-list/models"
+	"todo-list/orm"
 )
 
 func clearTables() {
-	_ = models.Folders.DeleteAll()
-	_ = models.Todos.DeleteAll()
-	_ = models.Users.DeleteAll()
-	_ = models.Workspaces.DeleteAll()
-	_ = models.WorkspaceMembers.DeleteAll()
+	_ = orm.Table(models.TableFolder).DeleteAll()
+	_ = orm.Table(models.TableTodo).DeleteAll()
+	_ = orm.Table(models.TableUser).DeleteAll()
+	_ = orm.Table(models.TableWorkspace).DeleteAll()
+	_ = orm.Table(models.TableWorkspaceMember).DeleteAll()
 }
 
 func createDummyContext() echo.Context {
@@ -20,7 +23,7 @@ func createDummyContext() echo.Context {
 }
 
 func createAuthorizedContext() echo.Context {
-	return createContext(models.TestUser())
+	return createContext(TestUser())
 }
 
 func createContext(user *models.User) echo.Context {
@@ -36,4 +39,80 @@ func createContext(user *models.User) echo.Context {
 		ctx.Set("user", t)
 	}
 	return ctx
+}
+
+func TestUser() *models.User {
+	email := "todo.test.user@gmail.com"
+	return createTestUser(email)
+}
+
+func createTestUser(email string) *models.User {
+	var u models.User
+	_ = orm.Table(models.TableUser).Find(&u, "emailAddress = ?", email)
+	if u.Id > 0 {
+		return &u
+	}
+	u = models.User{
+		EmailAddress:   email,
+		Password:       "password!@#$",
+		Username:       email,
+		RegisteredTime: time.Now().Unix(),
+	}
+	id, err := orm.Table(models.TableUser).Insert(&u)
+	if err != nil {
+		log.Fatal(err)
+	}
+	u.Id = id
+	return &u
+}
+
+func TestWorkspace() *models.Workspace {
+	name := "test workspace"
+	user := TestUser()
+
+	var w models.Workspace
+	err := orm.Table(models.TableWorkspace).Find(&w,
+		"name = ? AND id IN (SELECT workspaceId FROM workspaceMembers WHERE userId = ?)",
+		name,
+		user.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if w.Id != int64(0) {
+		return &w
+	}
+
+	w = models.Workspace{
+		Name:        name,
+		CreatedTime: time.Now().Unix(),
+	}
+	id, err := orm.Table(models.TableWorkspace).Insert(&w)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Id = id
+	m := models.WorkspaceMember{
+		Type:        models.MemberTypeOwner,
+		WorkspaceId: w.Id,
+		UserId:      user.Id,
+	}
+	id, err = orm.Table(models.TableWorkspaceMember).Insert(&m)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &w
+}
+
+func TestFolder() *models.Folder {
+	w := TestWorkspace()
+	f := &models.Folder{
+		Name: "test.folder",
+		WorkspaceId: w.Id,
+	}
+	id, err := orm.Table(models.TableFolder).Insert(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.Id = id
+	return f
 }

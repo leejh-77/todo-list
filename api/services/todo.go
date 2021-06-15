@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"todo-list/models"
+	"todo-list/orm"
 	"todo-list/result"
 )
 
@@ -30,7 +31,7 @@ func CreateTodo(c CreateTodoCommand) *result.ApiResult {
 		CompletedTime: c.CompletedTime,
 		Position:      0,
 	}
-	_, err = models.Todos.Insert(todo)
+	_, err = orm.Table(models.TableTodo).Insert(todo)
 	if err != nil {
 		return result.ServerError(err)
 	}

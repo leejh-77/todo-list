@@ -10,12 +10,12 @@ import (
 func TestCreateFolder(t *testing.T) {
 	clearTables()
 
-	w := models.TestWorkspace()
+	w := TestWorkspace()
 	c := CreateFolderCommand{
 		WorkspaceId: w.Id,
 		Name:        "test.folder",
 	}
-	ret := CreateFolder(models.TestUser().Id, c)
+	ret := CreateFolder(TestUser().Id, c)
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 }
@@ -23,12 +23,12 @@ func TestCreateFolder(t *testing.T) {
 func TestDeleteFolder(t *testing.T) {
 	clearTables()
 
-	u := models.TestUser()
-	f := models.TestFolder()
+	u := TestUser()
+	f := TestFolder()
 
 	DeleteFolder(u.Id, f.Id)
 
-	ret := GetFolders(u.Id, models.TestWorkspace().Id)
+	ret := GetFolders(u.Id, TestWorkspace().Id)
 	fs := ret.Result.([]models.Folder)
 
 	assert.Equal(t, 0, len(fs))

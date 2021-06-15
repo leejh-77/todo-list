@@ -3,18 +3,19 @@ package models
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"todo-list/orm"
 )
 
 
 func TestFindAll(t *testing.T) {
-	_ = Todos.DeleteAll()
+	_ = orm.Table(TableFolder).DeleteAll()
 
 	for i := 0; i < 3; i++ {
 		createTestTodo()
 	}
 
 	var arr []Todo
-	err := Todos.FindAll(&arr)
+	err := orm.Table(TableTodo).FindAll(&arr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,8 +31,8 @@ func TestUpdateTodo(t *testing.T) {
 	todo := createTestTodo()
 	todo.Subject = "Updated subject"
 
-	err := Todos.Update(todo)
-	err = Todos.FindById(todo, todo.Id)
+	err := orm.Table(TableTodo).Update(todo)
+	err = orm.Table(TableTodo).FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,11 +42,11 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestDeleteTodo(t *testing.T) {
 	todo := createTestTodo()
-	err := Todos.DeleteById(todo.Id)
+	err := orm.Table(TableTodo).DeleteById(todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = Todos.FindById(todo, todo.Id)
+	err = orm.Table(TableTodo).FindById(todo, todo.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +55,7 @@ func TestDeleteTodo(t *testing.T) {
 
 func makeTodo(subject string) *Todo {
 	todo := new(Todo)
-	todo.UserId = TestUser().Id
+	todo.UserId = int64(1)
 	todo.Subject = subject
 	todo.Body = "Test Todo Body"
 	todo.Status = TodoStatusNotStarted
@@ -63,11 +64,11 @@ func makeTodo(subject string) *Todo {
 
 func createTestTodo() *Todo {
 	todo := makeTodo("Test Todo")
-	id, err := Todos.Insert(todo)
+	id, err := orm.Table(TableTodo).Insert(todo)
 	if err != nil {
 		return nil
 	}
-	err = Todos.FindById(todo, id)
+	err = orm.Table(TableTodo).FindById(todo, id)
 	if err != nil {
 		return nil
 	}
