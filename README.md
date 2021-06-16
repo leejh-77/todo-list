@@ -1,2 +1,2 @@
 # todo-list
-todo-list for study
+스터디용 todo list 
