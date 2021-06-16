@@ -116,3 +116,23 @@ func TestFolder() *models.Folder {
 	f.Id = id
 	return f
 }
+
+func TestTodo() *models.Todo {
+	f := TestFolder()
+	u := TestUser()
+	t := &models.Todo{
+		FolderId:      f.Id,
+		UserId:        u.Id,
+		Subject:       "test todo",
+		Body:          "test todo body",
+		Status:        models.TodoStatusNotStarted,
+		CompletedTime: time.Now().Unix(),
+		Position:      0,
+	}
+	id, err := orm.Table(models.TableTodo).Insert(t)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Id = id
+	return t
+}

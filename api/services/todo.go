@@ -8,23 +8,46 @@ import (
 )
 
 type CreateTodoCommand struct {
-	FolderId int64
-	UserId int64
-	Subject string
-	Body string
-	Status int
-	CompletedTime int64
+	FolderId int64 `json:"folderIdd"`
+	Subject string `json:"subject"`
+	Body string `json:"body"`
+	Status int `json:"status"`
+	CompletedTime int64 `json:"completedTime"`
 }
 
-func CreateTodo(c CreateTodoCommand) *result.ApiResult {
+func GetTodo(uid int64, fid int64) *result.ApiResult {
+	var m models.WorkspaceMember
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndFolderId(&m, uid, fid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	if m.Id == int64(0) {
+		return result.BadRequest("user is not a member of the workspace of the folder")
+	}
+	var fs []models.Todo
+	err = models.TodoQuery(orm.Engine).FindByFolderId(&fs, fid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(fs)
+}
+
+func CreateTodo(uid int64, c CreateTodoCommand) *result.ApiResult {
 	err := validateCreateCommand(c)
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
-
+	var m models.WorkspaceMember
+	err = models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndFolderId(&m, uid, c.FolderId)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	if m.Id == int64(0) {
+		return result.BadRequest("user is not a member of the workspace of the folder")
+	}
 	todo := &models.Todo{
 		FolderId:      c.FolderId,
-		UserId:        c.UserId,
+		UserId: uid,
 		Subject:       c.Subject,
 		Body:          c.Body,
 		Status:        c.Status,
@@ -42,11 +65,8 @@ func validateCreateCommand(c CreateTodoCommand) error {
 	if c.FolderId == int64(0) {
 		return errors.New("folder id must not be empty")
 	}
-	if c.UserId == int64(0) {
-		return errors.New("user id must not be empty")
-	}
-	if len(c.Subject) == 0 {
-		return errors.New("subject must not be empty")
+	if c.Status != models.TodoStatusCompleted && c.CompletedTime != int64(0) {
+		return errors.New("uncompleted todo cannot have property `completedTime`")
 	}
 	return nil
 }

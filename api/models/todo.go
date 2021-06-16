@@ -1,5 +1,7 @@
 package models
 
+import "todo-list/orm"
+
 const (
 	TodoStatusNotStarted = 0
 	TodoStatusInProgress = 1
@@ -15,4 +17,16 @@ type Todo struct {
 	Status int
 	CompletedTime int64
 	Position int
+}
+
+type todoQuery struct {
+	s orm.Session
+}
+
+func TodoQuery(s orm.Session) *todoQuery {
+	return &todoQuery{s}
+}
+
+func (q *todoQuery) FindByFolderId(ts *[]Todo, fid int64) error {
+	return q.s.Table(TableTodo).Find(ts, "folderId = ?", fid)
 }
