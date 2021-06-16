@@ -29,3 +29,8 @@ func (q *workspaceMemberQuery) FindByUserIdAndWorkspaceId(m *WorkspaceMember, ui
 func (q *workspaceMemberQuery) FindByWorkspaceId(ms *[]WorkspaceMember, wid int64) error {
 	return q.s.Table(TableWorkspaceMember).Find(ms, "workspaceId = ?", wid)
 }
+
+func (q *workspaceMemberQuery) FindByUserIdAndFolderId(m *WorkspaceMember, uid int64, fid int64) error {
+	query := "userId = ? AND workspaceId IN (SELECT workspaceId from " + TableFolder + " WHERE id = ?)"
+	return q.s.Table(TableWorkspaceMember).Find(m, query, uid, fid)
+}

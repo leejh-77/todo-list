@@ -41,22 +41,13 @@ func CreateFolder(uid int64, c CreateFolderCommand) *result.ApiResult {
 }
 
 func DeleteFolder(uid int64, fid int64) *result.ApiResult {
-	var f models.Folder
-	err := orm.Table(models.TableFolder).FindById(&f, fid)
+	var m models.WorkspaceMember
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndFolderId(&m, uid, fid)
 	if err != nil {
 		return result.ServerError(err)
 	}
-	if f.Id == int64(0) {
-		return result.BadRequest("folder does not exist")
-	}
-	var w models.Workspace
-	err = orm.Table(models.TableWorkspace).FindById(&w, f.WorkspaceId)
-	if err != nil {
-		return result.ServerError(err)
-	}
-	ret := checkWorkspaceAuthority(uid, w.Id)
-	if ret != nil {
-		return ret
+	if m.Id == int64(0) {
+		return result.BadRequest("user is not a member of the workspace")
 	}
 	err = orm.Table(models.TableWorkspace).DeleteById(fid)
 	if err != nil {
@@ -72,7 +63,7 @@ func checkWorkspaceAuthority(uid int64, wid int64) *result.ApiResult {
 		return result.ServerError(err)
 	}
 	if m.Id == int64(0) {
-		return result.Unauthorized("user is not a member of this workspace")
+		return result.BadRequest("user is not a member of the workspace")
 	}
 	return nil
 }

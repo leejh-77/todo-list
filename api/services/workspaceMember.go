@@ -54,8 +54,10 @@ func AddWorkspaceMember(uid int64, wid int64) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
+	defer tr.Rollback()
+
 	var m models.WorkspaceMember
-	err = tr.Table(models.TableWorkspaceMember).Find(&m, "userId = ? AND workspaceId = ?", uid, wid)
+	err = models.WorkspaceMemberQuery(tr).FindByUserIdAndWorkspaceId(&m, uid, wid)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -66,6 +68,14 @@ func AddWorkspaceMember(uid int64, wid int64) *result.ApiResult {
 		Type:        models.MemberTypeParticipant,
 		WorkspaceId: wid,
 		UserId:      uid,
+	}
+	_, err = tr.Table(models.TableWorkspaceMember).Insert(&m)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	err = tr.Commit()
+	if err != nil {
+		return result.ServerError(err)
 	}
 	return result.Success("")
 }
@@ -101,5 +111,5 @@ func deleteWorkspaceMember(mid int64, wid int64, e orm.Session) error {
 	if len(ms) != 0 {
 		return nil
 	}
-	return deleteWorkspace(wid, e)
+	return e.Table(models.TableWorkspace).DeleteById(wid)
 }

@@ -9,9 +9,10 @@ import (
 )
 
 func TestGetMembers(t *testing.T) {
-	u := TestUser()
-
-	w := TestWorkspace()
+	var (
+		u = TestUser()
+		w = TestWorkspace()
+	)
 	ret := GetWorkspaceMembers(u.Id, w.Id)
 
 	data := ret.Result.([]GetUserResponseData)

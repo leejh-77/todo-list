@@ -56,8 +56,17 @@ func TestDeleteWorkspace_notMember_shouldFail(t *testing.T) {
 }
 
 func TestDeleteWorkspace_permissionDenied_shouldFail(t *testing.T) {
-	//w := TestWorkspace()
-	//u := createTestUser("another.user@email.com")
+	clearTables()
 
-	//ret := DeleteWorkspace(u.Id, w.Id)
+	w := TestWorkspace()
+	u := createTestUser("another.user@email.com")
+
+	ret := AddWorkspaceMember(u.Id, w.Id)
+
+	assert.Equal(t, http.StatusOK, ret.StatusCode)
+
+	ret = DeleteWorkspace(u.Id, w.Id)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user does not have permission to delete workspace", ret.Error.Message)
 }
