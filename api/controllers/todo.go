@@ -14,10 +14,11 @@ func (c TodoController) Init(g *echo.Group) {
 }
 
 func createTodo(ctx echo.Context) error {
+	uid := userIdFromContext(ctx)
 	c := services.CreateTodoCommand{}
 	err := ctx.Bind(&c)
 	if err != nil {
 		return err
 	}
-	return services.CreateTodo(c).Send(ctx)
+	return services.CreateTodo(uid, c).Send(ctx)
 }
