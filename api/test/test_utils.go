@@ -1,4 +1,4 @@
-package services
+package test
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -10,7 +10,7 @@ import (
 	"todo-list/orm"
 )
 
-func clearTables() {
+func ClearTables() {
 	_ = orm.Table(models.TableFolder).DeleteAll()
 	_ = orm.Table(models.TableTodo).DeleteAll()
 	_ = orm.Table(models.TableUser).DeleteAll()
@@ -18,15 +18,15 @@ func clearTables() {
 	_ = orm.Table(models.TableWorkspaceMember).DeleteAll()
 }
 
-func createDummyContext() echo.Context {
-	return createContext(nil)
+func CreateDummyContext() echo.Context {
+	return CreateContext(nil)
 }
 
-func createAuthorizedContext() echo.Context {
-	return createContext(TestUser())
+func CreateAuthorizedContext() echo.Context {
+	return CreateContext(TestUser())
 }
 
-func createContext(user *models.User) echo.Context {
+func CreateContext(user *models.User) echo.Context {
 	e := echo.New()
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	rec := httptest.NewRecorder()
@@ -43,10 +43,10 @@ func createContext(user *models.User) echo.Context {
 
 func TestUser() *models.User {
 	email := "todo.test.user@gmail.com"
-	return createTestUser(email)
+	return CreateTestUser(email)
 }
 
-func createTestUser(email string) *models.User {
+func CreateTestUser(email string) *models.User {
 	var u models.User
 	_ = models.UserQuery(orm.Engine).FindByEmailAddress(&u, email)
 	if u.Id > 0 {

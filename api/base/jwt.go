@@ -1,12 +1,11 @@
-package services
+package base
 
 import (
 	"github.com/dgrijalva/jwt-go"
 	"time"
-	"todo-list/base"
 )
 
-func createJwt(id int64, email string) (*string, error) {
+func CreateJwt(id int64, email string) (*string, error) {
 	c := jwt.MapClaims{}
 	c["exp"] = time.Now().Add(time.Hour).Unix()
 	c["email"] = email
@@ -14,7 +13,7 @@ func createJwt(id int64, email string) (*string, error) {
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 
-	token, err := t.SignedString([]byte(base.JWTSecret))
+	token, err := t.SignedString([]byte(JWTSecret))
 	if err != nil {
 		return nil, err
 	}

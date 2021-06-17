@@ -5,29 +5,30 @@ import (
 	"net/http"
 	"testing"
 	"todo-list/models"
+	"todo-list/test"
 )
 
 func TestCreateFolder(t *testing.T) {
-	clearTables()
+	test.ClearTables()
 
 	var (
-		w = TestWorkspace()
+		w = test.TestWorkspace()
 		c = CreateFolderCommand{
 			WorkspaceId: w.Id,
 			Name:        "test.folder",
 		}
 	)
 
-	ret := CreateFolder(TestUser().Id, c)
+	ret := CreateFolder(test.TestUser().Id, c)
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 }
 
 func TestCreateFolder_notMember_shouldFaile(t *testing.T) {
-	clearTables()
+	test.ClearTables()
 
 	var (
-		w = TestWorkspace()
-		u = createTestUser("another.user@email.com")
+		w = test.TestWorkspace()
+		u = test.CreateTestUser("another.user@email.com")
 		c = CreateFolderCommand{
 			WorkspaceId: w.Id,
 			Name: "test.folder",
@@ -41,12 +42,12 @@ func TestCreateFolder_notMember_shouldFaile(t *testing.T) {
 }
 
 func TestDeleteFolder(t *testing.T) {
-	clearTables()
+	test.ClearTables()
 
 	var (
-		u = TestUser()
-		f = TestFolder()
-		w = TestWorkspace()
+		u = test.TestUser()
+		f = test.TestFolder()
+		w = test.TestWorkspace()
 	)
 
 	DeleteFolder(u.Id, f.Id)
@@ -57,11 +58,11 @@ func TestDeleteFolder(t *testing.T) {
 }
 
 func TestDeleteFolder_notMember_shouldFail(t *testing.T) {
-	clearTables()
+	test.ClearTables()
 
 	var (
-		f = TestFolder()
-		u = createTestUser("another.user@email.com")
+		f = test.TestFolder()
+		u = test.CreateTestUser("another.user@email.com")
 	)
 
 	ret := DeleteFolder(u.Id, f.Id)

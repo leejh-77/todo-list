@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/mail"
 	"time"
+	"todo-list/base"
 	"todo-list/models"
 	"todo-list/orm"
 	"todo-list/result"
@@ -57,7 +58,7 @@ func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.Password)); err != nil {
 		return result.BadRequest("Password not matched")
 	}
-	token, err := createJwt(user.Id, c.EmailAddress)
+	token, err := base.CreateJwt(user.Id, c.EmailAddress)
 	if err != nil {
 		return result.ServerError(err)
 	}

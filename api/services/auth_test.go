@@ -63,7 +63,7 @@ func TestLogin(t *testing.T) {
 		EmailAddress: email,
 		Password: password,
 	}
-	ctx := createDummyContext()
+	ctx := test.CreateDummyContext()
 	ret = LogIn(ctx, c)
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
@@ -82,7 +82,7 @@ func TestLogin_invalidPassword_shouldFail(t *testing.T) {
 		EmailAddress: email,
 		Password: password + "1",
 	}
-	ctx := createDummyContext()
+	ctx := test.CreateDummyContext()
 	ret = LogIn(ctx, c)
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
