@@ -49,7 +49,7 @@ func DeleteFolder(uid int64, fid int64) *result.ApiResult {
 	if m.Id == int64(0) {
 		return result.BadRequest("user is not a member of the workspace")
 	}
-	err = orm.Table(models.TableWorkspace).DeleteById(fid)
+	err = orm.Table(models.TableFolder).DeleteById(fid)
 	if err != nil {
 		return result.ServerError(err)
 	}

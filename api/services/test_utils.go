@@ -126,7 +126,7 @@ func TestTodo() *models.Todo {
 		Subject:       "test todo",
 		Body:          "test todo body",
 		Status:        models.TodoStatusNotStarted,
-		CompletedTime: time.Now().Unix(),
+		CompletedTime: 0,
 		Position:      0,
 	}
 	id, err := orm.Table(models.TableTodo).Insert(t)

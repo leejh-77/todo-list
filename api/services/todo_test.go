@@ -4,7 +4,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+	"time"
 	"todo-list/models"
+	"todo-list/optional"
 )
 
 func TestGetTodo(t *testing.T) {
@@ -15,7 +17,7 @@ func TestGetTodo(t *testing.T) {
 		todo = TestTodo()
 	)
 
-	ret := GetTodo(u.Id, todo.FolderId)
+	ret := GetTodos(u.Id, todo.FolderId)
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
 
@@ -25,14 +27,12 @@ func TestGetTodo(t *testing.T) {
 }
 
 func TestGetTodo_notMember_shouldFail(t *testing.T) {
-	clearTables()
-
 	var (
 		u = createTestUser("another.user@email.com")
 		todo = TestTodo()
 	)
 
-	ret := GetTodo(u.Id, todo.FolderId)
+	ret := GetTodos(u.Id, todo.FolderId)
 
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 	assert.Equal(t, "user is not a member of the workspace of the folder", ret.Error.Message)
@@ -57,7 +57,7 @@ func TestCreateTodo(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 
-	ret = GetTodo(u.Id, f.Id)
+	ret = GetTodos(u.Id, f.Id)
 
 	created := ret.Result.([]models.Todo)[0]
 	assert.Equal(t, f.Id, created.FolderId)
@@ -67,37 +67,188 @@ func TestCreateTodo(t *testing.T) {
 }
 
 func TestCreateTodo_emptyFolderId_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+		c = CreateTodoCommand{
+			Subject:       "test todo",
+			Body:          "test todo body",
+			Status:        models.TodoStatusNotStarted,
+		}
+	)
 
+	ret := CreateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "folder id must not be empty", ret.Error.Message)
 }
 
 func TestCreateTodo_notMember_shouldFail(t *testing.T) {
+	var (
+		u = createTestUser("another.user@email.com")
+		f = TestFolder()
+		c = CreateTodoCommand{
+			FolderId:      f.Id,
+			Subject:       "test todo",
+			Body:          "test todo body",
+			Status:        models.TodoStatusNotStarted,
+		}
+	)
 
+	ret := CreateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user does not have permission to access the todo", ret.Error.Message)
 }
 
-func TestCreateTodo_conflictStatusAndCompleteTime(t *testing.T) {
+func TestCreateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+		f = TestFolder()
+		c = CreateTodoCommand{
+			FolderId:      f.Id,
+			Subject:       "test todo",
+			Body:          "test todo bdoy",
+			Status:        models.TodoStatusNotStarted,
+			CompletedTime: time.Now().Unix(),
+		}
+	)
 
+	ret := CreateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "uncompleted todo cannot have property `completedTime`", ret.Error.Message)
 }
 
 func TestUpdateTodo(t *testing.T) {
+	clearTables()
 
+	var (
+		u = TestUser()
+		todo = TestTodo()
+		c = UpdateTodoCommand{
+			Id: todo.Id,
+			Subject:       optional.NewString("updated todo subject"),
+		}
+	)
+	ret := UpdateTodo(u.Id, c)
+	assert.Equal(t, http.StatusOK, ret.StatusCode)
+
+	ret = GetTodos(u.Id, todo.FolderId)
+	todos := ret.Result.([]models.Todo)
+	updated := todos[0]
+
+	assert.Equal(t, "updated todo subject", updated.Subject)
+	assert.Equal(t, todo.Body, updated.Body)
+}
+
+func TestUpdateTodo_emptyId_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+		c = UpdateTodoCommand{
+			Subject:       optional.NewString("updated todo subject"),
+		}
+	)
+
+	ret := UpdateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "id must not be empty", ret.Error.Message)
+}
+
+func TestUpdateTodo_invalidId_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+		c = UpdateTodoCommand{
+			Id:            -1,
+			Subject: optional.NewString("updated todo subject"),
+		}
+	)
+
+	ret := UpdateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "requested todo not found", ret.Error.Message)
 }
 
 func TestUpdateTodo_notMember_shouldFail(t *testing.T) {
+	var (
+		u = createTestUser("another.user@email.com")
+		todo = TestTodo()
+		c = UpdateTodoCommand{
+			Id:            todo.Id,
+			Subject:       optional.NewString("updated todo subject"),
+		}
+	)
 
+	ret := UpdateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user does not have permission to access the todo", ret.Error.Message)
 }
 
-func TestUpdateTodo_conflictStatusAndCompleteTime(t *testing.T) {
+func TestUpdateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+		todo = TestTodo()
+		c = UpdateTodoCommand{
+			Id:            todo.Id,
+			Status:        optional.NewInt(models.TodoStatusNotStarted),
+			CompletedTime: optional.NewInt64(time.Now().Unix()),
+		}
+	)
 
+	ret := UpdateTodo(u.Id, c)
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "uncompleted todo cannot have property `completedTime`", ret.Error.Message)
 }
 
 func TestDeleteTodo(t *testing.T) {
+	clearTables()
 
+	var (
+		u = TestUser()
+		todo = TestTodo()
+	)
+
+	ret := DeleteTodo(u.Id, todo.Id)
+	assert.Equal(t, http.StatusOK, ret.StatusCode)
+
+	ret = GetTodos(u.Id, todo.FolderId)
+	todos := ret.Result.([]models.Todo)
+	assert.Equal(t, 0, len(todos))
+}
+
+func TestDeleteTodo_emptyId_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+	)
+
+	ret := DeleteTodo(u.Id, int64(0))
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "id must not be empty", ret.Error.Message)
+}
+
+func TestDeleteTodo_invalidId_shouldFail(t *testing.T) {
+	var (
+		u = TestUser()
+	)
+
+	ret := DeleteTodo(u.Id, int64(-1))
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "requested todo not found", ret.Error.Message)
 }
 
 func TestDeleteTodo_notMember_shouldFail(t *testing.T) {
+	var (
+		u = createTestUser("another.user@email.com")
+		todo = TestTodo()
+	)
+	ret := DeleteTodo(u.Id, todo.Id)
 
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+	assert.Equal(t, "user does not have permission to access the todo", ret.Error.Message)
 }
 
-func TestChangePosition(t *testing.T) {
-
-}
