@@ -53,10 +53,10 @@ func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 		return result.ServerError(err)
 	}
 	if user.Id == int64(0) {
-		return result.BadRequest("User not found for email - " + c.EmailAddress)
+		return result.BadRequest("user not found for email - " + c.EmailAddress)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.Password)); err != nil {
-		return result.BadRequest("Password not matched")
+		return result.BadRequest("password not matched")
 	}
 	token, err := base.CreateJwt(user.Id, c.EmailAddress)
 	if err != nil {

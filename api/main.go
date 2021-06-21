@@ -13,9 +13,12 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:8080"},
+	}))
 	e.GET("/hello", helloWorld)
 
-	controllers.AuthController{}.Init(e.Group("/"))
+	controllers.AuthController{}.Init(e.Group(""))
 
 	r := e.Group("api")
 	r.Use(middleware.JWT(base.JWTSecret))

@@ -2,6 +2,7 @@ package result
 
 import (
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 )
 
@@ -32,28 +33,22 @@ func Created() *ApiResult {
 
 func Error(code int, message string) *ApiResult {
 	return &ApiResult{
+		Result: message,
 		StatusCode: code,
-		Error: &ApiError{
-			Message: message,
-		},
 	}
 }
 
 func BadRequest(message string) *ApiResult {
 	return &ApiResult{
+		Result: message,
 		StatusCode: http.StatusBadRequest,
-		Error: &ApiError{
-			Message: message,
-		},
 	}
 }
 
 func Unauthorized(message string) *ApiResult {
 	return &ApiResult{
+		Result: message,
 		StatusCode: http.StatusUnauthorized,
-		Error:      &ApiError{
-			Message: message,
-		},
 	}
 }
 
@@ -72,6 +67,7 @@ func (ret *ApiResult) Send(ctx echo.Context) error {
 	if err != nil && err.Error != nil {
 		return err.Error
 	}
+	log.Println(ret.Result)
 	return ctx.JSON(ret.StatusCode, ret.Result)
 }
 
