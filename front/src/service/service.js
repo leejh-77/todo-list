@@ -2,6 +2,7 @@ import axios from "axios";
 
 axios.defaults.baseURL = "http://localhost:9090"
 axios.defaults.headers.post['Content-Type'] = 'application/json'
+axios.defaults.withCredentials = true
 
 export default {
     async login(email, password, callback) {
@@ -10,9 +11,10 @@ export default {
             password: password
         }
         try {
-            let ret = await axios.post("/login", JSON.stringify(data))
-            callback(ret)
+            await axios.post("/login", JSON.stringify(data))
+            callback(true)
         } catch (e) {
+            callback(false)
             console.error(e.response.data)
         }
     },
@@ -23,9 +25,19 @@ export default {
             username: username
         }
         try {
-            let ret = await  axios.post("/signup", JSON.stringify(data))
+            await axios.post("/signup", JSON.stringify(data))
+            callback(true)
+        } catch (e) {
+            callback(false)
+            console.error(e.response.data)
+        }
+    },
+    async getWorkspaces(callback) {
+        try {
+            let ret = await axios.get("/api/workspaces")
             callback(ret)
         } catch (e) {
+            callback(null)
             console.error(e.response.data)
         }
     }

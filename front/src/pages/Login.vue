@@ -11,7 +11,7 @@
 
 <script>
 
-import service from "../network/service";
+import service from "../service/service";
 
 export default {
   name: "Login",
@@ -24,7 +24,11 @@ export default {
   methods: {
     actionLogin: function() {
       service.login(this.email, this.password, (res) => {
-        console.log(res)
+        if (res) {
+          this.$router.push('/')
+        } else {
+          alert("email or password is incorrect")
+        }
       })
     },
     actionMoveToSignup: function() {

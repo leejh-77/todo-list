@@ -68,6 +68,9 @@ func (ret *ApiResult) Send(ctx echo.Context) error {
 		return err.Error
 	}
 	log.Println(ret.Result)
+	header := ctx.Response().Header()
+	header.Set("Cache-Control", "no-cache")
+	header.Set("Pragma", "no-cache")
 	return ctx.JSON(ret.StatusCode, ret.Result)
 }
 

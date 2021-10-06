@@ -10,7 +10,7 @@
 
 <script>
 
-import service from "../network/service";
+import service from "../service/service";
 
 export default {
   name: "Signup",
@@ -24,9 +24,30 @@ export default {
   },
   methods: {
     actionSignup: function() {
+      if (this.email.length === 0) {
+        alert("email required")
+      } else if (this.password.length === 0) {
+        alert("password required")
+      } else if (this.username.length === 0) {
+        alert("username required")
+      } else if (this.confirmPassword.length === 0) {
+        alert("confirm-password required")
+      } else if (!this.validEmail(this.email)) {
+        alert("email format not right")
+      } else if (this.password !== this.confirmPassword) {
+        alert("passwords not matched")
+      }
       service.signup(this.email, this.password, this.username, (res) => {
-        console.log(res)
+        if (res) {
+          this.$router.push('/login')
+        } else {
+          alert("failed to signup")
+        }
       })
+    },
+    validEmail: function (email) {
+      let re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
     }
   }
 }

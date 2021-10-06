@@ -66,6 +66,8 @@ func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	cookie.Name = "token"
 	cookie.Value = *token
 	cookie.HttpOnly = true
+	cookie.MaxAge = 86400
+	//cookie.SameSite = http.SameSiteNoneMode
 	//cookie.Secure = true
 	ctx.SetCookie(cookie)
 	return result.Success("")

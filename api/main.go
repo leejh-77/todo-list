@@ -15,13 +15,19 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:8080"},
+		AllowCredentials: true,
 	}))
 	e.GET("/hello", helloWorld)
 
 	controllers.AuthController{}.Init(e.Group(""))
 
 	r := e.Group("api")
-	r.Use(middleware.JWT(base.JWTSecret))
+	r.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey:              []byte(base.JWTSecret),
+		SigningMethod:           "HS256",
+		TokenLookup:             "cookie:token",
+	}))
+
 	controllers.WorkspaceController{}.Init(r.Group("/workspaces"))
 	controllers.FolderController{}.Init(r.Group("/folders"))
 	controllers.TodoController{}.Init(r.Group("/todos"))
