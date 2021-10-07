@@ -3,12 +3,20 @@ package services
 import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"os"
 	"testing"
+	"todo-list/base"
 	"todo-list/models"
 	"todo-list/orm"
 	"todo-list/result"
 	"todo-list/test"
 )
+
+func TestMain(m *testing.M) {
+	orm.Init(base.TestDBConfig)
+	models.RegisterTables()
+	os.Exit(m.Run())
+}
 
 func TestSignup(t *testing.T) {
 	ret := signUpTestUser(
@@ -81,7 +89,7 @@ func TestLogin(t *testing.T) {
 		EmailAddress: email,
 		Password: password,
 	}
-	ctx := test.CreateDummyContext()
+	ctx := models.CreateDummyContext()
 	ret = LogIn(ctx, c)
 
 	assert.Equal(t, http.StatusOK, ret.StatusCode)
@@ -100,7 +108,7 @@ func TestLogin_invalidPassword_shouldFail(t *testing.T) {
 		EmailAddress: email,
 		Password: password + "1",
 	}
-	ctx := test.CreateDummyContext()
+	ctx := models.CreateDummyContext()
 	ret = LogIn(ctx, c)
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }

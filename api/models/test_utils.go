@@ -1,4 +1,4 @@
-package test
+package models
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -6,16 +6,15 @@ import (
 	"log"
 	"net/http/httptest"
 	"time"
-	"todo-list/models"
 	"todo-list/orm"
 )
 
 func ClearTables() {
-	_ = orm.Table(models.TableFolder).DeleteAll()
-	_ = orm.Table(models.TableTodo).DeleteAll()
-	_ = orm.Table(models.TableUser).DeleteAll()
-	_ = orm.Table(models.TableWorkspace).DeleteAll()
-	_ = orm.Table(models.TableWorkspaceMember).DeleteAll()
+	_ = orm.Table(TableFolder).DeleteAll()
+	_ = orm.Table(TableTodo).DeleteAll()
+	_ = orm.Table(TableUser).DeleteAll()
+	_ = orm.Table(TableWorkspace).DeleteAll()
+	_ = orm.Table(TableWorkspaceMember).DeleteAll()
 }
 
 func CreateDummyContext() echo.Context {
@@ -26,7 +25,7 @@ func CreateAuthorizedContext() echo.Context {
 	return CreateContext(TestUser())
 }
 
-func CreateContext(user *models.User) echo.Context {
+func CreateContext(user *User) echo.Context {
 	e := echo.New()
 	req := httptest.NewRequest("GET", "http://localhost", nil)
 	rec := httptest.NewRecorder()
@@ -41,24 +40,24 @@ func CreateContext(user *models.User) echo.Context {
 	return ctx
 }
 
-func TestUser() *models.User {
+func TestUser() *User {
 	email := "todo.test.user@gmail.com"
 	return CreateTestUser(email)
 }
 
-func CreateTestUser(email string) *models.User {
-	var u models.User
-	_ = models.UserQuery(orm.Engine).FindByEmailAddress(&u, email)
+func CreateTestUser(email string) *User {
+	var u User
+	_ = UserQuery(orm.Engine).FindByEmailAddress(&u, email)
 	if u.Id > 0 {
 		return &u
 	}
-	u = models.User{
+	u = User{
 		EmailAddress:   email,
 		Password:       "password!@#$",
 		Username:       email,
 		RegisteredTime: time.Now().Unix(),
 	}
-	id, err := orm.Table(models.TableUser).Insert(&u)
+	id, err := orm.Table(TableUser).Insert(&u)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,12 +65,12 @@ func CreateTestUser(email string) *models.User {
 	return &u
 }
 
-func TestWorkspace() *models.Workspace {
+func TestWorkspace() *Workspace {
 	name := "test workspace"
 	user := TestUser()
 
-	var w models.Workspace
-	err := orm.Table(models.TableWorkspace).Find(&w,
+	var w Workspace
+	err := orm.Table(TableWorkspace).Find(&w,
 		"name = ? AND id IN (SELECT workspaceId FROM workspaceMembers WHERE userId = ?)",
 		name,
 		user.Id)
@@ -82,34 +81,34 @@ func TestWorkspace() *models.Workspace {
 		return &w
 	}
 
-	w = models.Workspace{
+	w = Workspace{
 		Name:        name,
 		CreatedTime: time.Now().Unix(),
 	}
-	id, err := orm.Table(models.TableWorkspace).Insert(&w)
+	id, err := orm.Table(TableWorkspace).Insert(&w)
 	if err != nil {
 		log.Fatal(err)
 	}
 	w.Id = id
-	m := models.WorkspaceMember{
-		Type:        models.MemberTypeOwner,
+	m := WorkspaceMember{
+		Type:        MemberTypeOwner,
 		WorkspaceId: w.Id,
 		UserId:      user.Id,
 	}
-	id, err = orm.Table(models.TableWorkspaceMember).Insert(&m)
+	id, err = orm.Table(TableWorkspaceMember).Insert(&m)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return &w
 }
 
-func TestFolder() *models.Folder {
+func TestFolder() *Folder {
 	w := TestWorkspace()
-	f := &models.Folder{
+	f := &Folder{
 		Name: "test.folder",
 		WorkspaceId: w.Id,
 	}
-	id, err := orm.Table(models.TableFolder).Insert(f)
+	id, err := orm.Table(TableFolder).Insert(f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,19 +116,19 @@ func TestFolder() *models.Folder {
 	return f
 }
 
-func TestTodo() *models.Todo {
+func TestTodo() *Todo {
 	f := TestFolder()
 	u := TestUser()
-	t := &models.Todo{
+	t := &Todo{
 		FolderId:      f.Id,
 		UserId:        u.Id,
 		Subject:       "test todo",
 		Body:          "test todo body",
-		Status:        models.TodoStatusNotStarted,
+		Status:        TodoStatusNotStarted,
 		CompletedTime: 0,
 		Position:      0,
 	}
-	id, err := orm.Table(models.TableTodo).Insert(t)
+	id, err := orm.Table(TableTodo).Insert(t)
 	if err != nil {
 		log.Fatal(err)
 	}

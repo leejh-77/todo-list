@@ -1,7 +1,6 @@
 package models
 
 import (
-	"todo-list/base"
 	"todo-list/orm"
 )
 
@@ -13,9 +12,7 @@ const (
 	TableFolder          = "folders"
 )
 
-func init() {
-	orm.Init(base.DBConfig)
-
+func RegisterTables() {
 	orm.Register(TableUser, User{})
 	orm.Register(TableTodo, Todo{})
 	orm.Register(TableWorkspace, Workspace{})

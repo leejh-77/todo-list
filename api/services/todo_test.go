@@ -7,15 +7,14 @@ import (
 	"time"
 	"todo-list/models"
 	"todo-list/optional"
-	"todo-list/test"
 )
 
 func TestGetTodo(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
 	var (
-		u = test.TestUser()
-		todo = test.TestTodo()
+		u = models.TestUser()
+		todo = models.TestTodo()
 	)
 
 	ret := GetTodos(u.Id, todo.FolderId)
@@ -29,8 +28,8 @@ func TestGetTodo(t *testing.T) {
 
 func TestGetTodo_notMember_shouldFail(t *testing.T) {
 	var (
-		u = test.CreateTestUser("another.user@email.com")
-		todo = test.TestTodo()
+		u = models.CreateTestUser("another.user@email.com")
+		todo = models.TestTodo()
 	)
 
 	ret := GetTodos(u.Id, todo.FolderId)
@@ -40,11 +39,11 @@ func TestGetTodo_notMember_shouldFail(t *testing.T) {
 }
 
 func TestCreateTodo(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
 	var (
-		u = test.TestUser()
-		f = test.TestFolder()
+		u = models.TestUser()
+		f = models.TestFolder()
 		c = CreateTodoCommand{
 			FolderId:      f.Id,
 			Subject:       "test todo",
@@ -69,7 +68,7 @@ func TestCreateTodo(t *testing.T) {
 
 func TestCreateTodo_emptyFolderId_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
+		u = models.TestUser()
 		c = CreateTodoCommand{
 			Subject:       "test todo",
 			Body:          "test todo body",
@@ -85,8 +84,8 @@ func TestCreateTodo_emptyFolderId_shouldFail(t *testing.T) {
 
 func TestCreateTodo_notMember_shouldFail(t *testing.T) {
 	var (
-		u = test.CreateTestUser("another.user@email.com")
-		f = test.TestFolder()
+		u = models.CreateTestUser("another.user@email.com")
+		f = models.TestFolder()
 		c = CreateTodoCommand{
 			FolderId:      f.Id,
 			Subject:       "test todo",
@@ -103,8 +102,8 @@ func TestCreateTodo_notMember_shouldFail(t *testing.T) {
 
 func TestCreateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
-		f = test.TestFolder()
+		u = models.TestUser()
+		f = models.TestFolder()
 		c = CreateTodoCommand{
 			FolderId:      f.Id,
 			Subject:       "test todo",
@@ -121,11 +120,11 @@ func TestCreateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
 }
 
 func TestUpdateTodo(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
 	var (
-		u = test.TestUser()
-		todo = test.TestTodo()
+		u = models.TestUser()
+		todo = models.TestTodo()
 		c = UpdateTodoCommand{
 			Id: todo.Id,
 			Subject:       optional.NewString("updated todo subject"),
@@ -144,7 +143,7 @@ func TestUpdateTodo(t *testing.T) {
 
 func TestUpdateTodo_emptyId_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
+		u = models.TestUser()
 		c = UpdateTodoCommand{
 			Subject:       optional.NewString("updated todo subject"),
 		}
@@ -158,7 +157,7 @@ func TestUpdateTodo_emptyId_shouldFail(t *testing.T) {
 
 func TestUpdateTodo_invalidId_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
+		u = models.TestUser()
 		c = UpdateTodoCommand{
 			Id:            -1,
 			Subject: optional.NewString("updated todo subject"),
@@ -173,8 +172,8 @@ func TestUpdateTodo_invalidId_shouldFail(t *testing.T) {
 
 func TestUpdateTodo_notMember_shouldFail(t *testing.T) {
 	var (
-		u = test.CreateTestUser("another.user@email.com")
-		todo = test.TestTodo()
+		u = models.CreateTestUser("another.user@email.com")
+		todo = models.TestTodo()
 		c = UpdateTodoCommand{
 			Id:            todo.Id,
 			Subject:       optional.NewString("updated todo subject"),
@@ -189,8 +188,8 @@ func TestUpdateTodo_notMember_shouldFail(t *testing.T) {
 
 func TestUpdateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
-		todo = test.TestTodo()
+		u = models.TestUser()
+		todo = models.TestTodo()
 		c = UpdateTodoCommand{
 			Id:            todo.Id,
 			Status:        optional.NewInt(models.TodoStatusNotStarted),
@@ -205,11 +204,11 @@ func TestUpdateTodo_conflictStatusAndCompleteTime_shouldFail(t *testing.T) {
 }
 
 func TestDeleteTodo(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
 	var (
-		u = test.TestUser()
-		todo = test.TestTodo()
+		u = models.TestUser()
+		todo = models.TestTodo()
 	)
 
 	ret := DeleteTodo(u.Id, todo.Id)
@@ -222,7 +221,7 @@ func TestDeleteTodo(t *testing.T) {
 
 func TestDeleteTodo_emptyId_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
+		u = models.TestUser()
 	)
 
 	ret := DeleteTodo(u.Id, int64(0))
@@ -233,7 +232,7 @@ func TestDeleteTodo_emptyId_shouldFail(t *testing.T) {
 
 func TestDeleteTodo_invalidId_shouldFail(t *testing.T) {
 	var (
-		u = test.TestUser()
+		u = models.TestUser()
 	)
 
 	ret := DeleteTodo(u.Id, int64(-1))
@@ -244,8 +243,8 @@ func TestDeleteTodo_invalidId_shouldFail(t *testing.T) {
 
 func TestDeleteTodo_notMember_shouldFail(t *testing.T) {
 	var (
-		u = test.CreateTestUser("another.user@email.com")
-		todo = test.TestTodo()
+		u = models.CreateTestUser("another.user@email.com")
+		todo = models.TestTodo()
 	)
 	ret := DeleteTodo(u.Id, todo.Id)
 

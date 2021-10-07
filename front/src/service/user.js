@@ -1,18 +1,16 @@
 import axios from "axios";
 
 export default {
-    async login(email, password, callback) {
+    login(email, password) {
         let data = {
             emailAddress: email,
             password: password
         }
-        try {
-            let res = await axios.post("/login", data)
-            console.log(res)
-            callback(res)
-        } catch (e) {
-            callback(e)
-        }
+        return new Promise((resolve, reject) => {
+            axios.post('/login', data)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
     },
     async signup(email, password, username, callback) {
         let data = {

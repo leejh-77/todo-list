@@ -6,14 +6,13 @@ import (
 	"testing"
 	"todo-list/models"
 	"todo-list/orm"
-	"todo-list/test"
 )
 
 
 func TestCreateWorkspace(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
-	uid := test.TestUser().Id
+	uid := models.TestUser().Id
 	c := CreateWorkspaceCommand{
 		Name: "Test Workspace",
 	}
@@ -30,16 +29,16 @@ func TestCreateWorkspace_invalidName_shouldFail(t *testing.T) {
 	c := CreateWorkspaceCommand{
 		Name: "",
 	}
-	ret := CreateWorkspace(test.TestUser().Id, c)
+	ret := CreateWorkspace(models.TestUser().Id, c)
 
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 	assert.Equal(t, "name must not be empty", ret.Error.Message)
 }
 
 func TestDeleteWorkspace(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
-	u, w := test.TestUser(), test.TestWorkspace()
+	u, w := models.TestUser(), models.TestWorkspace()
 	DeleteWorkspace(u.Id, w.Id)
 
 	ret := GetWorkspaces(u.Id)
@@ -48,8 +47,8 @@ func TestDeleteWorkspace(t *testing.T) {
 }
 
 func TestDeleteWorkspace_notMember_shouldFail(t *testing.T) {
-	w := test.TestWorkspace()
-	u := test.CreateTestUser("another.user@email.com")
+	w := models.TestWorkspace()
+	u := models.CreateTestUser("another.user@email.com")
 
 	ret := DeleteWorkspace(u.Id, w.Id)
 
@@ -58,10 +57,10 @@ func TestDeleteWorkspace_notMember_shouldFail(t *testing.T) {
 }
 
 func TestDeleteWorkspace_permissionDenied_shouldFail(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 
-	w := test.TestWorkspace()
-	u := test.CreateTestUser("another.user@email.com")
+	w := models.TestWorkspace()
+	u := models.CreateTestUser("another.user@email.com")
 
 	ret := AddWorkspaceMember(u.Id, w.Id)
 
@@ -74,10 +73,10 @@ func TestDeleteWorkspace_permissionDenied_shouldFail(t *testing.T) {
 }
 
 func TestGetMembers(t *testing.T) {
-	test.ClearTables()
+	models.ClearTables()
 	var (
-		u = test.TestUser()
-		w = test.TestWorkspace()
+		u = models.TestUser()
+		w = models.TestWorkspace()
 	)
 	ret := GetWorkspaceMembers(u.Id, w.Id)
 
@@ -91,8 +90,8 @@ func TestGetMembers(t *testing.T) {
 }
 
 func TestDeleteMember(t *testing.T) {
-	u := test.TestUser()
-	w := test.TestWorkspace()
+	u := models.TestUser()
+	w := models.TestWorkspace()
 
 	ret := DeleteWorkspaceMember(u.Id, w.Id)
 
@@ -105,7 +104,7 @@ func TestDeleteMember(t *testing.T) {
 }
 
 func TestDeleteMember_notExist_shouldFail(t *testing.T) {
-	w := test.TestWorkspace()
+	w := models.TestWorkspace()
 
 	ret := DeleteWorkspaceMember(w.Id, int64(93874)) // 존재하지 않는 user id
 
@@ -114,7 +113,7 @@ func TestDeleteMember_notExist_shouldFail(t *testing.T) {
 }
 
 func TestDeleteMember_checkDeleteWorkspaceWhenZeroMembers(t *testing.T) {
-	u, w := test.TestUser(), test.TestWorkspace()
+	u, w := models.TestUser(), models.TestWorkspace()
 
 	DeleteWorkspaceMember(u.Id, w.Id)
 

@@ -2,13 +2,22 @@ package models
 
 import (
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
+	"todo-list/base"
 	"todo-list/orm"
 )
 
 
+
+func TestMain(m *testing.M) {
+	orm.Init(base.TestDBConfig)
+	RegisterTables()
+	os.Exit(m.Run())
+}
+
 func TestFindAll(t *testing.T) {
-	_ = orm.Table(TableFolder).DeleteAll()
+	_ = orm.Table(TableTodo).DeleteAll()
 
 	for i := 0; i < 3; i++ {
 		createTestTodo()

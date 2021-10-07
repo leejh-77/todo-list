@@ -22,14 +22,16 @@ export default {
     }
   },
   methods: {
-    actionLogin: function() {
-      service.login(this.email, this.password, res => {
-        if (res.status === 200) {
-          this.$router.push('/')
-        } else {
-          alert("email or password is incorrect")
-        }
-      })
+    actionLogin: function () {
+      service.login(this.email, this.password)
+          .then(res => {
+            console.log(res)
+            this.$router.push('/')
+          })
+          .catch(e => {
+            console.log(e)
+            alert("email or password is incorrect")
+          })
     },
     actionMoveToSignup: function() {
       this.$router.push("/signup")

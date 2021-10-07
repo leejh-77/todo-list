@@ -11,3 +11,12 @@ var DBConfig = orm.DatabaseConfig{
 	Password: "1234",
 	Name:     "todo",
 }
+
+var TestDBConfig = orm.DatabaseConfig{
+	Driver:   "mysql",
+	Host:     "127.0.0.1:3306",
+	User:     "root",
+	Password: "1234",
+	Name:     "todo_test",
+}
+

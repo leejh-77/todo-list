@@ -7,9 +7,18 @@ import (
 	"net/http"
 	"todo-list/base"
 	"todo-list/controllers"
+	"todo-list/models"
+	"todo-list/orm"
 )
 
+func initORM() {
+	orm.Init(base.DBConfig)
+	models.RegisterTables()
+}
+
 func main() {
+	initORM()
+
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
