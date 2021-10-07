@@ -23,7 +23,7 @@ func TestCreateFolder(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, ret.StatusCode)
 }
 
-func TestCreateFolder_notMember_shouldFaile(t *testing.T) {
+func TestCreateFolder_notMember_shouldFail(t *testing.T) {
 	test.ClearTables()
 
 	var (

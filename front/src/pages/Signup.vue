@@ -10,7 +10,7 @@
 
 <script>
 
-import service from "../service/service";
+import service from "../service/user";
 
 export default {
   name: "Signup",
@@ -37,8 +37,8 @@ export default {
       } else if (this.password !== this.confirmPassword) {
         alert("passwords not matched")
       }
-      service.signup(this.email, this.password, this.username, (res) => {
-        if (res) {
+      service.signup(this.email, this.password, this.username, res => {
+        if (res.status === 200) {
           this.$router.push('/login')
         } else {
           alert("failed to signup")

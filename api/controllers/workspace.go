@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/labstack/echo/v4"
+	"strconv"
 	"todo-list/services"
 )
 
@@ -32,10 +33,10 @@ func createWorkspace(ctx echo.Context) error {
 
 func deleteWorkspace(ctx echo.Context) error {
 	uid := userIdFromContext(ctx)
-	var c services.DeleteWorkspaceCommand
-	err := ctx.Bind(&c)
+	param := ctx.Param("id")
+	wid, err := strconv.Atoi(param)
 	if err != nil {
 		return err
 	}
-	return services.DeleteWorkspace(uid, c).Send(ctx)
+	return services.DeleteWorkspace(uid, int64(wid)).Send(ctx)
 }

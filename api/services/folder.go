@@ -11,6 +11,10 @@ type CreateFolderCommand struct {
 	Name string
 }
 
+type DeleteFolderCommand struct {
+	FolderId int64
+}
+
 func GetFolders(uid int64, wid int64) *result.ApiResult {
 	ret := checkWorkspaceAuthority(uid, wid)
 	if ret != nil {

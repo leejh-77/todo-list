@@ -8,6 +8,7 @@ import 'vuetify/dist/vuetify.min.css'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './service/base.js'
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Workspaces from "./pages/Workspaces";

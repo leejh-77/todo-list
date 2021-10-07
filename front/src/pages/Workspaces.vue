@@ -21,7 +21,7 @@
 
 <script>
 
-import service from "../service/service";
+import service from "../service/workspace";
 import Modal from "../components/Modal";
 
 export default {
@@ -43,8 +43,8 @@ export default {
       this.newWorkspaceName = ''
     },
     actionAddWorkspace: function () {
-      service.addWorkspace(this.newWorkspaceName, (ret) => {
-        if (ret != null) {
+      service.addWorkspace(this.newWorkspaceName, res => {
+        if (res.status === 200) {
           this.getWorkspaces()
         }
         this.showModal = false
@@ -54,12 +54,12 @@ export default {
       this.$router.push('todo?workspaceId=' + id)
     },
     getWorkspaces: function () {
-      service.getWorkspaces(data => {
-        if (data == null) {
+      service.getWorkspaces(res => {
+        if (res.status === 200) {
+          this.workspaces = res.data == null ? [] : res.data
+        } else {
           this.$router.push('/login')
-        } else if (data.data != null) {
-            this.workspaces = data.data
-          }
+        }
       })
     }
   },

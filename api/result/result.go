@@ -33,22 +33,28 @@ func Created() *ApiResult {
 
 func Error(code int, message string) *ApiResult {
 	return &ApiResult{
-		Result: message,
 		StatusCode: code,
+		Error: &ApiError{
+			Message: message,
+		},
 	}
 }
 
 func BadRequest(message string) *ApiResult {
 	return &ApiResult{
-		Result: message,
 		StatusCode: http.StatusBadRequest,
+		Error: &ApiError{
+			Message: message,
+		},
 	}
 }
 
 func Unauthorized(message string) *ApiResult {
 	return &ApiResult{
-		Result: message,
 		StatusCode: http.StatusUnauthorized,
+		Error: &ApiError{
+			Message: "Internal server error",
+		},
 	}
 }
 

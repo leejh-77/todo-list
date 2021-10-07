@@ -11,7 +11,7 @@
 
 <script>
 
-import service from "../service/service";
+import service from "../service/user";
 
 export default {
   name: "Login",
@@ -23,8 +23,8 @@ export default {
   },
   methods: {
     actionLogin: function() {
-      service.login(this.email, this.password, (res) => {
-        if (res) {
+      service.login(this.email, this.password, res => {
+        if (res.status === 200) {
           this.$router.push('/')
         } else {
           alert("email or password is incorrect")
