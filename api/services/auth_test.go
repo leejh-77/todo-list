@@ -26,6 +26,24 @@ func TestSignup_invalidEmail_shouldFail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
 }
 
+func TestSignup_duplicateEmail_shouldFail(t *testing.T) {
+	email := "jonghoon.lee@email.com"
+
+	ret := signUpTestUser(
+		email,
+		"pasword@!@!",
+		"Jonghoon Lee")
+
+	assert.Equal(t, http.StatusCreated, ret.StatusCode)
+
+	ret = signUpTestUser(
+		email,
+		"pasword@!@!",
+		"Jonghoon Lee")
+
+	assert.Equal(t, http.StatusBadRequest, ret.StatusCode)
+}
+
 func TestSignup_invalidPassword_shouldFail(t *testing.T) {
 	ret := signUpTestUser(
 		"jonghoon.lee@gmail.com",

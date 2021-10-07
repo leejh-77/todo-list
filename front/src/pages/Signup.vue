@@ -24,6 +24,18 @@ export default {
   },
   methods: {
     actionSignup: function() {
+      if (!this.validateParams()) {
+        return
+      }
+      service.signup(this.email, this.password, this.username, res => {
+        if (res.status === 201) {
+          this.$router.push('/login')
+        } else {
+          alert("failed to signup")
+        }
+      })
+    },
+    validateParams : function() {
       if (this.email.length === 0) {
         alert("email required")
       } else if (this.password.length === 0) {
@@ -32,20 +44,16 @@ export default {
         alert("username required")
       } else if (this.confirmPassword.length === 0) {
         alert("confirm-password required")
-      } else if (!this.validEmail(this.email)) {
+      } else if (!this.validateEmail(this.email)) {
         alert("email format not right")
       } else if (this.password !== this.confirmPassword) {
         alert("passwords not matched")
+      } else {
+        return true
       }
-      service.signup(this.email, this.password, this.username, res => {
-        if (res.status === 200) {
-          this.$router.push('/login')
-        } else {
-          alert("failed to signup")
-        }
-      })
+      return false
     },
-    validEmail: function (email) {
+    validateEmail: function (email) {
       let re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
     }

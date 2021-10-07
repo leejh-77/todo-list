@@ -5,15 +5,18 @@ import BootstrapVue from "bootstrap-vue";
 import VueRouter from "vue-router";
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import store from './store/store'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './service/base.js'
+import vuetify from './plugins/vuetify'
+
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Workspaces from "./pages/Workspaces";
 import TodoList from "./pages/TodoList";
-import vuetify from './plugins/vuetify'
+
 
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
@@ -34,6 +37,7 @@ const router = new VueRouter({
 
 new Vue({
   router,
+  store,
   vuetify,
   render: h => h(App)
 }).$mount('#app')

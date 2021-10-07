@@ -7,7 +7,8 @@ export default {
             password: password
         }
         try {
-            let res = await axios.post("/login", JSON.stringify(data))
+            let res = await axios.post("/login", data)
+            console.log(res)
             callback(res)
         } catch (e) {
             callback(e)
@@ -20,7 +21,8 @@ export default {
             username: username
         }
         try {
-            let res = await axios.post("/signup", JSON.stringify(data))
+            let res = await axios.post("/signup", data)
+            console.log(res)
             callback(res)
         } catch (e) {
             callback(e)

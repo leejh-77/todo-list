@@ -96,5 +96,13 @@ func validateSignupRequest(c SignUpCommand) error {
 	if len(username) <= 4 {
 		return errors.New("invalid username")
 	}
+	var u models.User
+	err = models.UserQuery(orm.Engine).FindByEmailAddress(&u, c.EmailAddress)
+	if err != nil {
+		return err
+	}
+	if u.Id > int64(0) {
+		return errors.New("email already registered")
+	}
 	return nil
 }

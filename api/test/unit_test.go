@@ -1,12 +1,32 @@
 package test
 
 import (
+	"gopkg.in/yaml.v3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
 	"os"
 	"testing"
 )
+
+type AppConfig struct {
+	Email string `yaml:"email"`
+	Name string `yaml:"name"`
+}
+
+func TestReadYaml(t *testing.T) {
+	b, err := os.ReadFile("config.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var config AppConfig
+	err = yaml.Unmarshal(b, &config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(config.Email)
+	log.Println(config.Name)
+}
 
 func TestEnv(t *testing.T) {
 	err := os.Setenv("jwt-secret", "jwt-secret")

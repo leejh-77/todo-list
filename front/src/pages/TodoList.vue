@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-sheet height="400" class="overflow-hidden" style="position: relative;">
+    <v-sheet height="700" class="overflow-hidden" style="position: relative;">
       <v-navigation-drawer absolute>
         <v-list-item>
           <v-list-item-avatar>
@@ -8,7 +8,7 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title>John Leider</v-list-item-title>
+            <v-list-item-title>Username</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -20,6 +20,11 @@
               <v-list-item-title>{{ folder.name }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title v-if="folders.length === 0">Add Folder</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-navigation-drawer>
     </v-sheet>
@@ -28,36 +33,41 @@
 
 <script>
 
-import service from '../service/folder'
+import folderService from '../service/folder'
+import todoService from '../service/todo'
 
 export default {
   name: "TodoList",
   data: function () {
     return {
       workspaceId : 0,
-      folders: []
+      folders: [],
+      selectedFolder: null,
     }
   },
   methods: {
+    actionAddFolder() {
+      folderService.addFolder(this.workspaceId)
+    },
     getFolders() {
-      service.getFolders(this.workspaceId, res => {
+      folderService.getFolders(this.workspaceId, res => {
         if (res.status === 200) {
           this.folders = res.data == null ? [] : res.data
+          this.selectedFolder = this.folders[0]
         } else {
           alert('something wrong')
         }
       })
     },
-    addFolder() {
-      service.addFolder()
-    },
     getTodos() {
-
+      todoService.getTodos(this.selectedFolder, res => {
+        this.todos = res.data
+      })
     },
-
   },
   created() {
     this.workspaceId = this.$route.query.workspaceId
+    this.getFolders()
   }
 }
 </script>
