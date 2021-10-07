@@ -36,6 +36,19 @@ export default {
         try {
             let ret = await axios.get("/api/workspaces")
             callback(ret)
+            console.log(ret)
+        } catch (e) {
+            callback(null)
+            console.error(e.response.data)
+        }
+    },
+    async addWorkspace(name, callback) {
+        try {
+            let data = {
+                'name' : name
+            }
+            let ret = await axios.post("/api/workspaces", data)
+            callback(ret)
         } catch (e) {
             callback(null)
             console.error(e.response.data)

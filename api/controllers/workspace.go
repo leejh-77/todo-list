@@ -13,7 +13,6 @@ func (w WorkspaceController) Init(g *echo.Group) {
 	g.GET("", getWorkspaces)
 	g.POST("", createWorkspace)
 	g.DELETE("/:id", deleteWorkspace)
-
 }
 
 func getWorkspaces(ctx echo.Context) error {
@@ -22,9 +21,21 @@ func getWorkspaces(ctx echo.Context) error {
 }
 
 func createWorkspace(ctx echo.Context) error {
-	return nil
+	uid := userIdFromContext(ctx)
+	var c services.CreateWorkspaceCommand
+	err := ctx.Bind(&c)
+	if err != nil {
+		return err
+	}
+	return services.CreateWorkspace(uid, c).Send(ctx)
 }
 
 func deleteWorkspace(ctx echo.Context) error {
-	return nil
+	uid := userIdFromContext(ctx)
+	var c services.DeleteWorkspaceCommand
+	err := ctx.Bind(&c)
+	if err != nil {
+		return err
+	}
+	return services.DeleteWorkspace(uid, c).Send(ctx)
 }

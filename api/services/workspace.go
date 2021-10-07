@@ -9,7 +9,11 @@ import (
 )
 
 type CreateWorkspaceCommand struct {
-	Name string
+	Name string `json:"name"`
+}
+
+type DeleteWorkspaceCommand struct {
+	WorkspaceId int64 `json:"workspaceId"`
 }
 
 func GetWorkspaces(uid int64) *result.ApiResult {
@@ -35,9 +39,9 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	return result.Created()
 }
 
-func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
+func DeleteWorkspace(uid int64, c DeleteWorkspaceCommand) *result.ApiResult {
 	var m models.WorkspaceMember
-	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndWorkspaceId(&m, uid, wid)
+	err := models.WorkspaceMemberQuery(orm.Engine).FindByUserIdAndWorkspaceId(&m, uid, c.WorkspaceId)
 	if err != nil {
 		return result.ServerError(err)
 	}
@@ -48,7 +52,7 @@ func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 		return result.BadRequest("user does not have permission to delete workspace")
 	}
 	err = orm.InTransaction(func(e orm.Session) error {
-		return deleteWorkspace(wid, e)
+		return deleteWorkspace(c.WorkspaceId, e)
 	})
 	if err != nil {
 		return result.ServerError(err)

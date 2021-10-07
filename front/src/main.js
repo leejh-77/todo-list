@@ -9,6 +9,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Workspaces from "./pages/Workspaces";
+import TodoList from "./pages/TodoList";
 
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
@@ -17,6 +18,7 @@ Vue.config.productionTip = false
 const routes = [
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
+  { path: '/todo', component: TodoList },
   { path: '/', component: Workspaces },
 ]
 

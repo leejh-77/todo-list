@@ -3,9 +3,9 @@ package models
 import "todo-list/orm"
 
 type Workspace struct {
-	Id int64
-	Name string
-	CreatedTime int64
+	Id int64 `json:"id"`
+	Name string `json:"name"`
+	CreatedTime int64 `json:"createdTime"`
 }
 
 type workspaceQuery struct {
