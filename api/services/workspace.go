@@ -25,6 +25,15 @@ func GetWorkspaces(uid int64) *result.ApiResult {
 	return result.Success(workspaces)
 }
 
+func GetWorkspace(uid int64, wid int64) *result.ApiResult {
+	var w models.Workspace
+	err := orm.Table(models.TableWorkspace).FindById(&w, wid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(w)
+}
+
 func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	err := validateCreateWorkspaceCommand(c)
 	if err != nil {

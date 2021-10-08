@@ -7,8 +7,8 @@ import (
 )
 
 type CreateFolderCommand struct {
-	WorkspaceId int64
-	Name string
+	WorkspaceId int64 `json:"workspaceId"`
+	Name string `json:"name"`
 }
 
 type DeleteFolderCommand struct {
@@ -41,7 +41,7 @@ func CreateFolder(uid int64, c CreateFolderCommand) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
-	return result.Created()
+	return result.Success(f)
 }
 
 func DeleteFolder(uid int64, fid int64) *result.ApiResult {

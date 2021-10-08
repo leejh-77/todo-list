@@ -35,7 +35,7 @@ export default {
     },
     actionMoveToSignup: function() {
       this.$router.push("/signup")
-    }
+    },
   }
 }
 </script>

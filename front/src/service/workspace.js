@@ -9,6 +9,13 @@ export default {
             callback(e)
         }
     },
+    getWorkspace(wid) {
+        return new Promise((resolve, reject) => {
+            axios.get('/api/workspaces/' + wid)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
+    },
     async addWorkspace(name, callback) {
         try {
             let data = {

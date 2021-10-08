@@ -1,6 +1,13 @@
 import axios from "axios";
 
 export default {
+    getMe() {
+        return new Promise((resolve, reject) => {
+            axios.get('/api/users/me')
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
+    },
     login(email, password) {
         let data = {
             emailAddress: email,

@@ -40,6 +40,7 @@ func main() {
 	controllers.WorkspaceController{}.Init(r.Group("/workspaces"))
 	controllers.FolderController{}.Init(r.Group("/folders"))
 	controllers.TodoController{}.Init(r.Group("/todos"))
+	controllers.UserController{}.Init(r.Group("/users"))
 
 	err := e.Start(":9090")
 	if err != nil {

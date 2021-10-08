@@ -9,13 +9,15 @@ export default {
             callback(e)
         }
     },
-    async addFolder(workspaceId, folderName, callback) {
+    addFolder(workspaceId, folderName) {
         let data = {
             "workspaceId" : workspaceId,
             "name" : folderName
         }
-        await axios.post('/api/folders', data)
-            .then(res => callback(res))
-            .catch(e => { callback(e) })
+        return new Promise((resolve, reject) => {
+            axios.post('/api/folders', data)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
     }
 }
