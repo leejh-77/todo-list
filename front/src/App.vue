@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <h1 id="app-title">todo-list app</h1>
     <router-view></router-view>
   </div>
 </template>
@@ -15,16 +14,18 @@ export default {
 </script>
 
 <style>
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 40px;
+  height: 100%;
 }
 
-#app-title {
-  margin-bottom: 20px;
+html, body {
+  height: 100%;
 }
+
 </style>

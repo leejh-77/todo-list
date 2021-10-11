@@ -5,10 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     getters: {
-        user: state => {
-            console.log('getUser' + state.user.username)
-            return state.user
-        },
+        user: state => state.user,
         workspace: state => state.workspace
     },
     state: {
@@ -24,7 +21,6 @@ export default new Vuex.Store({
     },
     mutations: {
         setUser(state, user) {
-            console.log('setUser' + user.username)
             state.user = user
         },
         setWorkspace(state, workspace) {

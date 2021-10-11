@@ -1,12 +1,15 @@
 <template>
-  <b-form>
-    <b-form-input id="emailAddress" placeholder="email" type="email" v-model="email"></b-form-input>
-    <b-form-input id="password" placeholder="password" type="password" v-model="password"></b-form-input>
-    <div>
-      <b-button id="button-login" v-on:click="actionLogin">Login</b-button>
-      <b-button id="button-signup" v-on:click="actionMoveToSignup">Signup</b-button>
-    </div>
-  </b-form>
+  <div>
+    <h1 id="app-title">todo-list app</h1>
+    <b-form>
+      <b-form-input id="emailAddress" placeholder="email" type="email" v-model="email"></b-form-input>
+      <b-form-input id="password" placeholder="password" type="password" v-model="password"></b-form-input>
+      <div>
+        <b-button id="button-login" v-on:click="actionLogin">Login</b-button>
+        <b-button id="button-signup" v-on:click="actionMoveToSignup">Signup</b-button>
+      </div>
+    </b-form>
+  </div>
 </template>
 
 <script>
