@@ -1,13 +1,12 @@
 import axios from "axios";
 
 export default {
-    async getFolders(workspaceId, callback) {
-        try {
-            let res = await axios.get('/api/folders?workspaceId=' + workspaceId)
-            callback(res)
-        } catch (e) {
-            callback(e)
-        }
+    getFolders(workspaceId) {
+        return new Promise((resolve, reject) => {
+            axios.get('/api/folders?workspaceId=' + workspaceId)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
     },
     addFolder(workspaceId, folderName) {
         let data = {

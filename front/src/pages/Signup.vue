@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 id="app-title">todo-list app</h1>
+    <h1 class="app-title">Todo List</h1>
     <b-form>
       <b-form-input id="input-field" placeholder="email" type="email" v-model="email"></b-form-input>
       <b-form-input id="input-field" placeholder="username" v-model="username"></b-form-input>
@@ -65,6 +65,10 @@ export default {
 </script>
 
 <style scoped>
+
+.app-title {
+  margin-top: 20px;
+}
 
 #input-field {
   margin: auto auto 10px;

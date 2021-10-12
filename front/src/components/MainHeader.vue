@@ -4,55 +4,31 @@
       <img class="app-icon" src="../assets/logo.png">
       <p class="app-title">Todo-List</p>
     </div>
+    <div class="user-info">
+      <img class="user-icon" src="../assets/user_icon.png"/>
+      <p class="user-name">{{ user.username }}</p>
+    </div>
   </div>
 </template>
 
 <script>
-import userService from "../service/user";
-import workspaceService from "../service/workspace";
-import folderService from "../service/folder";
+
+import {mapGetters} from "vuex";
 
 export default {
   name: "MainHeader",
   methods: {
     actionGoToHome () {
       console.log('go to home')
-    },
-    getMyData() {
-      userService.getMe()
-          .then(res => {
-            console.log(res)
-            this.$store.commit('setUser', res.data)
-            this.getWorkspaceData()
-          })
-          .catch(e => {
-            console.log(e)
-          })
-    },
-    getWorkspaceData() {
-      workspaceService.getWorkspace(this.$route.query.workspaceId)
-          .then(res => {
-            console.log(res.data)
-            this.$store.commit('setWorkspace', res.data)
-            this.getFolderData()
-          })
-          .catch(e => {
-            console.log(e)
-          })
-    },
-    getFolderData() {
-      folderService.getFolders(this.workspace.id, res => {
-        if (res.status === 200) {
-          this.folders = res.data == null ? [] : res.data
-          this.selectedFolder = this.folders[0]
-        } else {
-          alert('something wrong')
-        }
-      })
     }
   },
+  computed: {
+    ...mapGetters([
+        'user'
+    ])
+  },
   mounted() {
-    this.getMyData()
+    this.$store.dispatch('loadMe')
   }
 }
 </script>
@@ -81,6 +57,26 @@ export default {
 .app-title {
   float: left;
   margin-left: 10px;
+  font-weight: bold;
+}
+
+.user-info {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  align-content: center;
+  line-height: 40px;
+}
+
+.user-icon {
+  width: 40px;
+  float: left;
+  margin-right: 10px;
+}
+
+.user-name {
+  float: left;
+  margin-right: 30px;
 }
 
 </style>

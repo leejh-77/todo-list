@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 id="app-title">todo-list app</h1>
+    <h1 class="app-title">Todo List</h1>
     <b-list-group id="workspace-list">
       <b-list-group-item id="workspace-list-item" v-for="workspace in workspaces" v-bind:key="workspace.id"
                          v-on:click="actionMoveToWorkspace(workspace.id)">
@@ -62,7 +62,8 @@ export default {
           this.$router.push('/login')
         }
       })
-    }
+    },
+
   },
   created() {
     this.getWorkspaces()
@@ -71,6 +72,10 @@ export default {
 </script>
 
 <style scoped>
+
+.app-title {
+  margin-top: 20px;
+}
 
 ul {
   list-style: none;

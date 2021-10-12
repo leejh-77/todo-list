@@ -12,8 +12,6 @@
     "bootstrap": "^5.0.1",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
-    "node-scss": "^7.0.3",
-    "scss-loader": "^0.0.1",
     "vue": "^2.6.12",
     "vue-router": "^3.5.1",
     "vuetify": "^2.4.0",
