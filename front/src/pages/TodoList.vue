@@ -2,7 +2,7 @@
   <div class="main-container">
     <MainHeader/>
     <FolderList class="folder-list"/>
-    <TodoCards class="todo-board"/>
+    <TodoBoard class="todo-board"/>
   </div>
 </template>
 
@@ -10,11 +10,11 @@
 
 import MainHeader from "../components/MainHeader";
 import FolderList from "../components/FolderList";
-import TodoCards from "../components/TodoBoard";
+import TodoBoard from "../components/TodoBoard";
 
 export default {
   name: "TodoList",
-  components: {TodoCards, FolderList, MainHeader},
+  components: {TodoBoard, FolderList, MainHeader},
 }
 </script>
 

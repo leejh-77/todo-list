@@ -9,14 +9,14 @@ const (
 )
 
 type Todo struct {
-	Id int64
-	FolderId int64
-	UserId int64
-	Subject string
-	Body string
-	Status int
-	CompletedTime int64
-	Position int
+	Id int64 `json:"id"`
+	FolderId int64 `json:"folderId"`
+	UserId int64 `json:"userId"`
+	Subject string `json:"subject"`
+	Body string `json:"body"`
+	Status int `json:"status"`
+	CompletedTime int64 `json:"completedTime"`
+	Position int `json:"position"`
 }
 
 type todoQuery struct {

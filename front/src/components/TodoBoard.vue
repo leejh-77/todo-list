@@ -2,45 +2,114 @@
   <div class="page-body">
     <div class="list" v-for="list in cardLists" v-bind:key="list.status">
       <p class="list-title">{{list.name}}</p>
-      <div class="card" v-for="todo in list.cards" v-bind:key="todo.id">
-        <p>{{todo.name}}</p>
+      <div class="card" v-for="todo in list.todos" v-bind:key="todo.id">
+        <p class="card-subject">{{todo.subject}}</p>
       </div>
-      <div class="card-add-button" @click="actionAddNewTodo(list.status)">
+      <div class="card-add-button" @click="actionShowModal(list.status)">
         <p class="card-add-button-text">Add Todo</p>
       </div>
     </div>
+    <AddTodoModal class="add-todo-modal"
+                  :status="this.todoStatus"
+                  v-if="this.showTodoModal"
+                  @close="actionCloseModal"
+                  @onTodoCreated="onTodoCreated"/>
   </div>
 </template>
 
 <script>
 import {TodoStatus} from "../const";
+import {mapGetters} from "vuex";
+import todoService from '../service/todo'
+import AddTodoModal from "./AddTodoModal";
 
 export default {
   name: "TodoCards",
+  components: {AddTodoModal},
   data() {
     return {
+      todoStatus: 0,
+      showTodoModal: false,
       cardLists : [
         {
           status: TodoStatus.NotStarted,
           name : 'Not Started',
-          cards : []
+          todos : []
         },
         {
           status: TodoStatus.InProgress,
           name : 'In Progress',
-          cards : []
+          todos : []
         },
         {
           status: TodoStatus.Completed,
           name : 'Completed',
-          cards : []
+          todos : []
         },
       ]
     }
   },
+  computed: {
+    ...mapGetters([
+        'folder'
+    ]),
+    getFolder() {
+      return this.folder
+    }
+  },
+  watch: {
+    getFolder () {
+      this.loadTodos()
+    }
+  },
   methods: {
-    actionAddNewTodo(status) {
-      console.log(status)
+    actionShowModal(status) {
+      this.todoStatus = status
+      this.showTodoModal = true
+    },
+    actionCloseModal() {
+      this.showTodoModal = false
+    },
+    onTodoCreated(todo) {
+      this.actionCloseModal()
+      let list
+      if (this.todoStatus === TodoStatus.NotStarted) {
+        list = this.cardLists[0].todos
+      } else if (this.todoStatus === TodoStatus.InProgress) {
+        list = this.cardLists[1].todos
+      } else {
+        list = this.cardLists[2].todos
+      }
+      list.push(todo)
+    },
+    loadTodos() {
+      todoService.getTodos(this.folder.id)
+      .then(res => {
+        let notStarted = this.cardLists[0]
+        let inProgress = this.cardLists[1]
+        let completed = this.cardLists[2]
+
+        notStarted.todos = []
+        inProgress.todos = []
+        completed.todos = []
+
+        let todos = res.data
+        if (todos == null) {
+          return
+        }
+
+        console.log(res)
+        todos.forEach(todo => {
+          let status = todo.status
+          if (status === TodoStatus.NotStarted) {
+            notStarted.todos.push(todo)
+          } else if (status === TodoStatus.InProgress) {
+            inProgress.todos.push(todo)
+          } else {
+            completed.todos.push(todo)
+          }
+        })
+      })
     }
   }
 }
@@ -83,10 +152,26 @@ export default {
   border-radius: 3px;
 }
 
+.card-add-button {
+  margin-top: 10px;
+}
+
+.card-add-button:hover {
+  cursor: pointer;
+}
+
 .card-add-button-text {
   text-align: right;
   margin-right: 15px;
   margin-bottom: 10px;
+}
+
+.card {
+  padding: 10px;
+}
+
+.card-subject {
+  text-align: left;
 }
 
 </style>

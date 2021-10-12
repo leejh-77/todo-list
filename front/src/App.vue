@@ -28,4 +28,8 @@ html, body {
   height: 100%;
 }
 
+b-button {
+  color: white;
+}
+
 </style>

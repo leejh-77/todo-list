@@ -26,6 +26,19 @@ func TestGetTodo(t *testing.T) {
 	assert.Equal(t, todo.Id, todos[0].Id)
 }
 
+func TestGetEmptyTodos(t *testing.T) {
+	models.ClearTables()
+
+	var (
+		u = models.TestUser()
+		f = models.TestFolder()
+	)
+
+	ret := GetTodos(u.Id, f.Id)
+
+	assert.Equal(t, http.StatusOK, ret.StatusCode)
+}
+
 func TestGetTodo_notMember_shouldFail(t *testing.T) {
 	var (
 		u = models.CreateTestUser("another.user@email.com")

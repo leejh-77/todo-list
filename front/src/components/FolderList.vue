@@ -6,14 +6,15 @@
           <v-list-item-title class="text-h6">{{ workspace.name }}</v-list-item-title>
         </v-list-item-content>
         <v-list-item-icon>
-          <v-img width="5px" src="../assets/expand_icon.png"/>
+          <v-img width="2px" src="../assets/expand_icon.png"/>
         </v-list-item-icon>
       </v-list-item>
 
       <v-divider style="margin: 0"/>
 
       <v-list dense nav>
-        <v-list-item v-for="folder in folders" :key="folder.id" link>
+        <v-list-item v-for="folder in folders" :key="folder.id" link
+                     :class="isSelectedFolder(folder) ? 'selected-folder-item' : ''" @click="onSelectFolder(folder)">
           <v-list-item-content>
             <v-list-item-title>{{ folder.name }}</v-list-item-title>
           </v-list-item-content>
@@ -39,14 +40,14 @@ export default {
   name: "FolderList",
   computed: {
     ...mapGetters([
-      'workspace'
-    ])
+      'workspace',
+      'folder'
+    ]),
   },
   components: {AddFolderModal},
   data() {
     return {
       folders: [],
-      selectedFolder: null,
       showAddFolderModal: false
     }
   },
@@ -54,6 +55,12 @@ export default {
     this.getWorkspaceData()
   },
   methods: {
+    isSelectedFolder(folder) {
+      return this.folder.id === folder.id
+    },
+    onSelectFolder(folder) {
+      this.$store.commit('setFolder', folder)
+    },
     getWorkspaceData() {
       workspaceService.getWorkspace(this.$route.query.workspaceId)
           .then(res => {
@@ -70,7 +77,7 @@ export default {
           .then(res => {
             if (res.status === 200) {
               this.folders = res.data == null ? [] : res.data
-              this.selectedFolder = this.folders[0]
+              this.$store.commit('setFolder', this.folders[0])
             } else {
               alert('something wrong')
             }
@@ -100,6 +107,9 @@ export default {
   cursor: pointer;
 }
 
+.selected-folder-item {
+  background: lightgray;
+}
 
 .add-folder-button {
   background: cornflowerblue;

@@ -21,7 +21,12 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper:          nil,
+		Format:           "[${time_rfc3339_nano}] ${method} ${uri} ${status} ${error}",
+		CustomTimeFormat: "",
+		Output:           nil,
+	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:8080"},
 		AllowCredentials: true,
