@@ -3,18 +3,18 @@
     <h1 class="app-title">Todo List</h1>
     <b-list-group id="workspace-list">
       <b-list-group-item id="workspace-list-item" v-for="workspace in workspaces" v-bind:key="workspace.id"
-                         v-on:click="actionMoveToWorkspace(workspace.id)">
+                         @click="actionMoveToWorkspace(workspace.id)">
         {{ workspace.name }}
       </b-list-group-item>
     </b-list-group>
     <p id="workspace-empty" v-show="workspaces.length === 0">There is no workspaces you are in</p>
-    <b-button v-on:click="this.actionShowModal">Add Workspace</b-button>
-    <Modal v-on:close="this.actionCloseModal" v-if="showModal">
+    <b-button @click="this.actionShowModal">Add Workspace</b-button>
+    <Modal @close="this.actionCloseModal" v-if="showModal">
       <p>Write name for workspace</p>
       <div>
         <b-input v-model="newWorkspaceName"/></div>
       <template slot="footer">
-        <b-button v-on:click="actionAddWorkspace">Add</b-button>
+        <b-button @click="actionAddWorkspace">Add</b-button>
       </template>
     </Modal>
   </div>
@@ -85,7 +85,8 @@ ul {
   margin-bottom: 20px;
 }
 
-#workspace-list-item {
+#workspace-list-item:hover {
+  cursor: pointer;
 }
 
 </style>

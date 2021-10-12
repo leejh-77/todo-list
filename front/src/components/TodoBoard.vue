@@ -2,9 +2,12 @@
   <div class="page-body">
     <div class="list" v-for="list in cardLists" v-bind:key="list.status">
       <p class="list-title">{{list.name}}</p>
-      <div class="card" v-for="todo in list.todos" v-bind:key="todo.id">
-        <p class="card-subject">{{todo.subject}}</p>
-      </div>
+      <draggable :list="list.todos" group="todos" @change="log">
+        <div class="card" v-for="todo in list.todos" :key="todo.id">
+          <p class="card-subject">{{todo.subject}}</p>
+          <p class="card-body">{{todo.body}}</p>
+        </div>
+      </draggable>
       <div class="card-add-button" @click="actionShowModal(list.status)">
         <p class="card-add-button-text">Add Todo</p>
       </div>
@@ -18,6 +21,7 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable'
 import {TodoStatus} from "../const";
 import {mapGetters} from "vuex";
 import todoService from '../service/todo'
@@ -25,7 +29,7 @@ import AddTodoModal from "./AddTodoModal";
 
 export default {
   name: "TodoCards",
-  components: {AddTodoModal},
+  components: {AddTodoModal, draggable},
   data() {
     return {
       todoStatus: 0,
@@ -81,6 +85,9 @@ export default {
         list = this.cardLists[2].todos
       }
       list.push(todo)
+    },
+    log(evt) {
+      console.log(evt)
     },
     loadTodos() {
       todoService.getTodos(this.folder.id)
@@ -168,10 +175,17 @@ export default {
 
 .card {
   padding: 10px;
+  border-radius: 10px;
 }
 
 .card-subject {
+  font-weight: bold;
   text-align: left;
+}
+
+.card-body {
+  text-align: left;
+  padding: 0;
 }
 
 </style>

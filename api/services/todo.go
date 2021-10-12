@@ -24,6 +24,11 @@ type UpdateTodoCommand struct {
 	CompletedTime optional.Int64  `json:"completedTime"`
 }
 
+type MoveTodoCommand struct {
+	Status optional.Int `json:"status"`
+	Position int `json:"position"`
+}
+
 func (c *UpdateTodoCommand) hasChange() bool {
 	return c.Subject.Set || c.Body.Set || c.Status.Set || c.CompletedTime.Set
 }
@@ -67,7 +72,7 @@ func CreateTodo(uid int64, c CreateTodoCommand) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
-	return result.Created()
+	return result.Success(todo)
 }
 
 func UpdateTodo(uid int64, c UpdateTodoCommand) *result.ApiResult {
@@ -124,6 +129,34 @@ func DeleteTodo(uid int64, tid int64) *result.ApiResult {
 		return result.ServerError(err)
 	}
 	return result.Success("")
+}
+
+func MoveTodo(uid int64, tid int64, c MoveTodoCommand) *result.ApiResult {
+	if tid == int64(0) {
+		return result.BadRequest("todo id must not be empty")
+	}
+	t, ret := findTodo(tid)
+	if ret != nil {
+		return ret
+	}
+	ret = checkFolderAuthority(uid, t.FolderId)
+	if ret != nil {
+		return ret
+	}
+	var todo models.Todo
+	err := orm.Table(models.TableTodo).FindById(&todo, tid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	todo.Position = c.Position
+	if c.Status.Set {
+		todo.Status = c.Status.Value
+	}
+	err = orm.Table(models.TableTodo).Update(todo)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(todo)
 }
 
 func findTodo(tid int64) (*models.Todo, *result.ApiResult) {
