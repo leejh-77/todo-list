@@ -5,8 +5,8 @@
         <v-list-item-content>
           <v-list-item-title class="text-h6">{{ workspace.name }}</v-list-item-title>
         </v-list-item-content>
-        <v-list-item-icon>
-          <v-img width="2px" src="../assets/expand_icon.png"/>
+        <v-list-item-icon class="workspace-expand-icon">
+          <v-img src="../assets/expand_icon.png"/>
         </v-list-item-icon>
       </v-list-item>
 
@@ -26,7 +26,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <AddFolderModal v-if="this.showAddFolderModal" @close="this.actionCloseAddFolderModal" @created="onFolderCreated"/>
+    <AddFolderModal v-if="showAddFolderModal" @close="actionCloseAddFolderModal" @created="onFolderCreated"/>
   </v-card>
 </template>
 
@@ -101,10 +101,16 @@ export default {
 
 .workspace-info {
   background: #eeeeee;
+  height: 30px;
 }
 
 .workspace-info:hover {
   cursor: pointer;
+}
+
+.workspace-expand-icon {
+  width: 15px;
+  height: 20px;
 }
 
 .selected-folder-item {

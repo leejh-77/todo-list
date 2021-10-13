@@ -116,11 +116,22 @@ func createTable(info *TableInfo) {
 
 func typeString(p reflect.Type) string {
 	k := p.Kind()
-	if k == reflect.String {
+	switch k {
+	case reflect.String:
 		return "TEXT"
-	}
-	if k == reflect.Int64 {
+	case reflect.Int8:
+		return "TINYINT"
+	case reflect.Int16:
+		return "SMALLINT"
+	case reflect.Int:
+	case reflect.Int32:
 		return "INT"
+	case reflect.Int64:
+		return "BIGINT"
+	case reflect.Float32:
+		return "FLOAT"
+	case reflect.Float64:
+		return "DOUBLE"
 	}
 	str := p.String()
 	if str == "time.Time" {

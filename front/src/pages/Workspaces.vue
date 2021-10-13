@@ -2,7 +2,7 @@
   <div>
     <h1 class="app-title">Todo List</h1>
     <b-list-group id="workspace-list">
-      <b-list-group-item id="workspace-list-item" v-for="workspace in workspaces" v-bind:key="workspace.id"
+      <b-list-group-item id="workspace-list-item" v-for="workspace in workspaces" :key="workspace.id"
                          @click="actionMoveToWorkspace(workspace.id)">
         {{ workspace.name }}
       </b-list-group-item>
@@ -85,8 +85,13 @@ ul {
   margin-bottom: 20px;
 }
 
+#workspace-list-item {
+  margin: 10px;
+}
+
 #workspace-list-item:hover {
   cursor: pointer;
+  background: #eeeeee;
 }
 
 </style>

@@ -6,7 +6,7 @@
       <b-form-input id="input-field" placeholder="username" v-model="username"></b-form-input>
       <b-form-input id="input-field" placeholder="password" type="password" v-model="password"></b-form-input>
       <b-form-input id="input-field" placeholder="confirm password" type="password" v-model="confirmPassword"></b-form-input>
-      <b-button id="button" v-on:click="actionSignup">SignUp</b-button>
+      <b-button id="button" @click="actionSignup">SignUp</b-button>
     </b-form>
   </div>
 </template>

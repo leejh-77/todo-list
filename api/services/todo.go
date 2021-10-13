@@ -25,8 +25,9 @@ type UpdateTodoCommand struct {
 }
 
 type MoveTodoCommand struct {
+	FolderId int64
 	Status optional.Int `json:"status"`
-	Position int `json:"position"`
+	Position float32 `json:"position"`
 }
 
 func (c *UpdateTodoCommand) hasChange() bool {
@@ -59,6 +60,13 @@ func CreateTodo(uid int64, c CreateTodoCommand) *result.ApiResult {
 	if ret != nil {
 		return ret
 	}
+	pos, err := models.TodoQuery(orm.Engine).FindLastPosition(c.FolderId, c.Status)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	if pos > .0 {
+		pos++
+	}
 	todo := &models.Todo{
 		FolderId:      c.FolderId,
 		UserId: uid,
@@ -66,7 +74,7 @@ func CreateTodo(uid int64, c CreateTodoCommand) *result.ApiResult {
 		Body:          c.Body,
 		Status:        c.Status,
 		CompletedTime: c.CompletedTime,
-		Position:      0,
+		Position:      pos,
 	}
 	_, err = orm.Table(models.TableTodo).Insert(todo)
 	if err != nil {
@@ -98,6 +106,13 @@ func UpdateTodo(uid int64, c UpdateTodoCommand) *result.ApiResult {
 	}
 	if c.Status.Set {
 		t.Status = c.Status.Value
+		if t.Status != c.Status.Value {
+			pos, err := models.TodoQuery(orm.Engine).FindLastPosition(t.FolderId, t.Status)
+			if err != nil {
+				return result.ServerError(err)
+			}
+			t.Position = pos
+		}
 	}
 	if c.CompletedTime.Set {
 		t.CompletedTime = c.CompletedTime.Value
@@ -109,7 +124,7 @@ func UpdateTodo(uid int64, c UpdateTodoCommand) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
-	return result.Success("")
+	return result.Success(t)
 }
 
 func DeleteTodo(uid int64, tid int64) *result.ApiResult {

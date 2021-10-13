@@ -23,7 +23,7 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper:          nil,
-		Format:           "[${time_rfc3339_nano}] ${method} ${uri} ${status} ${error}",
+		Format:           "[${time_rfc3339_nano}] ${method} ${uri} ${status} ${error}\n",
 		CustomTimeFormat: "",
 		Output:           nil,
 	}))

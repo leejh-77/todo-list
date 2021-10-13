@@ -3,20 +3,21 @@
     <div class="list" v-for="list in cardLists" v-bind:key="list.status">
       <p class="list-title">{{list.name}}</p>
       <draggable :list="list.todos" group="todos" @change="log">
-        <div class="card" v-for="todo in list.todos" :key="todo.id">
+        <div class="card" v-for="todo in list.todos" :key="todo.id" @click="actionUpdateTodo(todo)">
           <p class="card-subject">{{todo.subject}}</p>
           <p class="card-body">{{todo.body}}</p>
         </div>
       </draggable>
-      <div class="card-add-button" @click="actionShowModal(list.status)">
+      <div class="card-add-button" @click="actionCreateNewTodo(list.status)">
         <p class="card-add-button-text">Add Todo</p>
       </div>
     </div>
-    <AddTodoModal class="add-todo-modal"
-                  :status="this.todoStatus"
-                  v-if="this.showTodoModal"
+    <EditTodoModal class="add-todo-modal"
+                  :todo="editingTodo"
+                  v-if="showTodoModal"
                   @close="actionCloseModal"
-                  @onTodoCreated="onTodoCreated"/>
+                   @onFinishEdit="onFinishEdit"
+                   @onDelete="onDelete"/>
   </div>
 </template>
 
@@ -25,15 +26,16 @@ import draggable from 'vuedraggable'
 import {TodoStatus} from "../const";
 import {mapGetters} from "vuex";
 import todoService from '../service/todo'
-import AddTodoModal from "./AddTodoModal";
+import EditTodoModal from "./EditTodoModal";
 
 export default {
   name: "TodoCards",
-  components: {AddTodoModal, draggable},
+  components: {EditTodoModal, draggable},
   data() {
     return {
-      todoStatus: 0,
+      editingTodo: {},
       showTodoModal: false,
+      todos: [],
       cardLists : [
         {
           status: TodoStatus.NotStarted,
@@ -67,56 +69,107 @@ export default {
     }
   },
   methods: {
-    actionShowModal(status) {
-      this.todoStatus = status
+    actionCreateNewTodo(status) {
+      this.editingTodo = {
+        subject: '',
+        body: '',
+        status: status
+      }
+      this.showTodoModal = true
+    },
+    actionUpdateTodo(todo) {
+      this.editingTodo = {
+        id: todo.id,
+        subject: todo.subject,
+        body: todo.body,
+        status: todo.status
+      }
       this.showTodoModal = true
     },
     actionCloseModal() {
       this.showTodoModal = false
+      this.editingTodo = null
     },
-    onTodoCreated(todo) {
-      this.actionCloseModal()
-      let list
-      if (this.todoStatus === TodoStatus.NotStarted) {
-        list = this.cardLists[0].todos
-      } else if (this.todoStatus === TodoStatus.InProgress) {
-        list = this.cardLists[1].todos
+    onFinishEdit() {
+      let todo = this.editingTodo
+      todo.folderId = this.$store.state.folder.id
+      todo.userId = this.$store.state.user.id
+
+      if (todo.id == null) {
+        todoService.createTodo(todo)
+            .then(res => {
+              this.todos.push(res.data)
+              this.alignTodos()
+              this.actionCloseModal()
+            })
       } else {
-        list = this.cardLists[2].todos
+        todoService.updateTodo(todo)
+        .then(res => {
+          let updated = res.data
+          this.todos.forEach(item => {
+            if (item.id === updated.id) {
+              item.subject = updated.subject
+              item.body = updated.body
+              item.position = updated.position
+              item.status = updated.status
+            }
+          })
+          this.alignTodos()
+          this.actionCloseModal()
+        })
       }
-      list.push(todo)
     },
-    log(evt) {
-      console.log(evt)
+    onDelete(todo) {
+      todoService.deleteTodo(todo.id)
+      .then(res => {
+        console.log(res)
+        var i
+        for (i = 0; i < this.todos.length; i++) {
+          if (todo.id === this.todos[i].id) {
+            this.todos.splice(i, 1)
+            break
+          }
+        }
+      })
+    },
+    log(evt, evt2) {
+      console.log('todo moved', evt)
+      console.log('todo moved', evt2)
     },
     loadTodos() {
       todoService.getTodos(this.folder.id)
       .then(res => {
-        let notStarted = this.cardLists[0]
-        let inProgress = this.cardLists[1]
-        let completed = this.cardLists[2]
-
-        notStarted.todos = []
-        inProgress.todos = []
-        completed.todos = []
-
-        let todos = res.data
-        if (todos == null) {
-          return
+        this.todos = res.data
+        if (this.todos != null) {
+          this.alignTodos()
         }
-
-        console.log(res)
-        todos.forEach(todo => {
-          let status = todo.status
-          if (status === TodoStatus.NotStarted) {
-            notStarted.todos.push(todo)
-          } else if (status === TodoStatus.InProgress) {
-            inProgress.todos.push(todo)
-          } else {
-            completed.todos.push(todo)
-          }
-        })
       })
+    },
+    alignTodos() {
+      let notStarted = this.cardLists[0]
+      let inProgress = this.cardLists[1]
+      let completed = this.cardLists[2]
+
+      notStarted.todos = []
+      inProgress.todos = []
+      completed.todos = []
+
+      this.todos.forEach(todo => {
+        let status = todo.status
+        if (status === TodoStatus.NotStarted) {
+          notStarted.todos.push(todo)
+        } else if (status === TodoStatus.InProgress) {
+          inProgress.todos.push(todo)
+        } else {
+          completed.todos.push(todo)
+        }
+      })
+      notStarted.todos.sort(this.sortTodos)
+      inProgress.todos.sort(this.sortTodos)
+      completed.todos.sort(this.sortTodos)
+    },
+    sortTodos(t1, t2) {
+      return t1.position - t2.position
     }
   }
 }
@@ -137,7 +190,7 @@ export default {
   width: 32%;
   float: left;
   background: #eee;
-  border-radius: 5px;
+  border-radius: 10px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -156,7 +209,22 @@ export default {
 
 .card {
   margin: 5px;
-  border-radius: 3px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.card:hover {
+  cursor: pointer;
+}
+
+.card-subject {
+  font-weight: bold;
+  text-align: left;
+}
+
+.card-body {
+  text-align: left;
+  padding: 0;
 }
 
 .card-add-button {
@@ -173,19 +241,5 @@ export default {
   margin-bottom: 10px;
 }
 
-.card {
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.card-subject {
-  font-weight: bold;
-  text-align: left;
-}
-
-.card-body {
-  text-align: left;
-  padding: 0;
-}
 
 </style>

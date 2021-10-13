@@ -2,7 +2,7 @@
   <Modal @close="actionCloseModal">
     <p>Write name for folder</p>
     <div>
-      <b-input v-model="this.inputString"/>
+      <b-input v-model="inputString"/>
     </div>
     <template slot="footer">
       <b-button @click="actionAddFolder">Add</b-button>

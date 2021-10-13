@@ -11,7 +11,7 @@
           <v-row align="center">
             <v-col class="d-flex" cols="12" sm="6">
               <v-select :items="statusItems"
-                        v-model="selectedStatus"
+                        v-model="todo.status"
                         item-text="name"
                         item-value="value"></v-select>
             </v-col>
@@ -23,7 +23,8 @@
         <b-textarea class="todo-body-text" v-model="todo.body"/>
       </div>
       <template slot="footer">
-        <b-button @click="actionAddTodo">Add</b-button>
+        <b-button @click="actionDeleteTodo" v-if="todo.id != null">Delete</b-button>
+        <b-button @click="actionAddTodo">{{ buttonText }}</b-button>
       </template>
     </Modal>
   </v-app>
@@ -33,19 +34,14 @@
 
 import Modal from "./Modal";
 import {TodoStatus} from "../const";
-import todoService from '../service/todo'
 
 export default {
-  name: "AddTodoModal",
+  name: "EditTodoModal",
   components: {Modal},
-  props: ['status'],
+  props: ['todo'],
   data() {
     return {
-      todo : {
-        subject: '',
-        body: '',
-      },
-      selectedStatus: {},
+      buttonText: '',
       statusItems: [
         { name: 'Not Started', value: TodoStatus.NotStarted },
         { name: 'In Progress', value: TodoStatus.InProgress },
@@ -55,31 +51,21 @@ export default {
   },
   methods: {
     actionAddTodo() {
-      let todo = {
-        subject: this.todo.subject,
-        body: this.todo.body,
-        folderId: this.$store.state.folder.id,
-        userId: this.$store.state.user.id,
-        status: this.selectedStatus.value
-      }
-      console.log(todo)
-      todoService.createTodo(todo)
-          .then(res => {
-            this.$emit('onTodoCreated', res.data)
-          })
+      this.$emit('onFinishEdit', this.todo)
+    },
+    actionDeleteTodo() {
+      this.$emit('onDelete', this.todo)
     },
     actionClose() {
       this.$emit('close')
     },
   },
   mounted() {
-    console.log(this.todo == null)
-    let status = this.status
-    this.statusItems.forEach(s => {
-      if (s.value === status) {
-        this.selectedStatus = s
-      }
-    })
+    if (this.todo.id == null) {
+      this.buttonText = 'Add'
+    } else {
+      this.buttonText = 'Update'
+    }
   }
 }
 </script>

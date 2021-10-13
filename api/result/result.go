@@ -2,7 +2,6 @@ package result
 
 import (
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -73,7 +72,6 @@ func (ret *ApiResult) Send(ctx echo.Context) error {
 	if err != nil && err.Error != nil {
 		return err.Error
 	}
-	log.Println(ret.Result)
 	header := ctx.Response().Header()
 	header.Set("Cache-Control", "no-cache")
 	header.Set("Pragma", "no-cache")
