@@ -4,7 +4,7 @@
       <img class="app-icon" src="../assets/logo.png">
       <p class="app-title">Todo-List</p>
     </div>
-    <div class="user-info">
+    <div class="user-info" @click="actionClickUserInfo">
       <img class="user-icon" src="../assets/user_icon.png"/>
       <p class="user-name">{{ user.username }}</p>
     </div>
@@ -18,8 +18,11 @@ import {mapGetters} from "vuex";
 export default {
   name: "MainHeader",
   methods: {
-    actionGoToHome () {
+    actionGoToHome() {
       console.log('go to home')
+    },
+    actionClickUserInfo() {
+
     }
   },
   computed: {

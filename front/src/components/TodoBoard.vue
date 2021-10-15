@@ -140,9 +140,7 @@ export default {
       todoService.getTodos(this.folder.id)
       .then(res => {
         this.todos = res.data
-        if (this.todos != null) {
-          this.alignTodos()
-        }
+        this.alignTodos()
       })
     },
     alignTodos() {
@@ -154,6 +152,9 @@ export default {
       inProgress.todos = []
       completed.todos = []
 
+      if (this.todos == null) {
+        return
+      }
       this.todos.forEach(todo => {
         let status = todo.status
         if (status === TodoStatus.NotStarted) {
@@ -164,13 +165,15 @@ export default {
           completed.todos.push(todo)
         }
       })
-      notStarted.todos.sort(this.sortTodos)
-      inProgress.todos.sort(this.sortTodos)
-      completed.todos.sort(this.sortTodos)
+
+      let sortTodos = (t1, t2) => {
+        return t1.position - t2.position
+      }
+
+      notStarted.todos.sort(sortTodos)
+      inProgress.todos.sort(sortTodos)
+      completed.todos.sort(sortTodos)
     },
-    sortTodos(t1, t2) {
-      return t1.position - t2.position
-    }
   }
 }
 </script>

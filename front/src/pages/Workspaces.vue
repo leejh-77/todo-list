@@ -56,14 +56,9 @@ export default {
     },
     getWorkspaces: function () {
       service.getWorkspaces(res => {
-        if (res.status === 200) {
-          this.workspaces = res.data == null ? [] : res.data
-        } else {
-          this.$router.push('/login')
-        }
+        this.workspaces = res.data == null ? [] : res.data
       })
     },
-
   },
   created() {
     this.getWorkspaces()

@@ -40,6 +40,7 @@ export default {
   name: "FolderList",
   computed: {
     ...mapGetters([
+      'user',
       'workspace',
       'folder'
     ]),

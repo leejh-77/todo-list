@@ -5,11 +5,18 @@
 </template>
 
 <script>
+import bus from './event-bus'
+import {ServerError} from "./const";
 
 export default {
   name: 'App',
   components: {
   },
+  created() {
+    bus.$on(ServerError.Unauthenticated, () => {
+      this.$router.push('/login')
+    })
+  }
 }
 </script>
 

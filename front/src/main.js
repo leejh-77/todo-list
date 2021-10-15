@@ -10,6 +10,7 @@ import store from './store/store'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './service/base.js'
+import './event-bus'
 import vuetify from './plugins/vuetify'
 
 import Signup from "./pages/Signup";

@@ -4,6 +4,10 @@ export var TodoStatus = Object.freeze({
     Completed : 2
 })
 
+export var ServerError = Object.freeze({
+    Unauthenticated : 'unauthenticated',
+})
+
 export default {
 
 }
