@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
-	"net/http"
 	"todo-list/base"
 	"todo-list/controllers"
 	"todo-list/models"
@@ -14,6 +13,12 @@ import (
 func initORM() {
 	orm.Init(base.DBConfig)
 	models.RegisterTables()
+
+
+}
+
+func createImageDir() {
+
 }
 
 func main() {
@@ -31,7 +36,6 @@ func main() {
 		AllowOrigins:     []string{"http://localhost:8080"},
 		AllowCredentials: true,
 	}))
-	e.GET("/hello", helloWorld)
 
 	controllers.AuthController{}.Init(e.Group(""))
 
@@ -51,8 +55,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func helloWorld(e echo.Context) error {
-	return e.String(http.StatusOK, "hello, world!")
 }

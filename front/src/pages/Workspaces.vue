@@ -23,7 +23,7 @@
 <script>
 
 import service from "../service/workspace";
-import Modal from "../components/Modal";
+import Modal from "../modals/Modal";
 
 export default {
   name: "Workspaces",

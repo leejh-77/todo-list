@@ -19,18 +19,27 @@ export default {
                 .catch(e => reject(e))
         })
     },
-    async signup(email, password, username, callback) {
+    signup(email, password, username) {
         let data = {
             emailAddress: email,
             password: password,
             username: username
         }
-        try {
-            let res = await axios.post("/signup", data)
-            console.log(res)
-            callback(res)
-        } catch (e) {
-            callback(e)
-        }
+        return new Promise((resolve, reject) => {
+            axios.post("/signup", data)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
     },
+    update(imageData, username) {
+        let data = {
+            image: imageData,
+            username: username
+        }
+        return new Promise((resolve, reject) => {
+            axios.put('/api/user', data)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
+    }
 }

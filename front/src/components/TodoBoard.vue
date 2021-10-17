@@ -26,7 +26,7 @@ import draggable from 'vuedraggable'
 import {TodoStatus} from "../const";
 import {mapGetters} from "vuex";
 import todoService from '../service/todo'
-import EditTodoModal from "./EditTodoModal";
+import EditTodoModal from "../modals/EditTodoModal";
 
 export default {
   name: "TodoCards",

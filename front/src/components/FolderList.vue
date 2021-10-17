@@ -34,7 +34,7 @@
 import {mapGetters} from "vuex";
 import workspaceService from "../service/workspace";
 import folderService from "../service/folder";
-import AddFolderModal from "./AddFolderModal";
+import AddFolderModal from "../modals/AddFolderModal";
 
 export default {
   name: "FolderList",

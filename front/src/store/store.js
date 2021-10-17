@@ -15,6 +15,7 @@ export default new Vuex.Store({
             id: 0,
             username: '',
             emailAddress: '',
+            imageUrl: null,
             authenticated: false
         },
         workspace: {

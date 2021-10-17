@@ -12,6 +12,7 @@ type UserController struct {
 
 func (c UserController) Init(g *echo.Group)  {
 	g.GET("/:id", getUser)
+	g.PUT("", updateUser)
 }
 
 func getUser(ctx echo.Context) error {
@@ -27,4 +28,14 @@ func getUser(ctx echo.Context) error {
 		uid = int64(v)
 	}
 	return services.GetUser(uid).Send(ctx)
+}
+
+func updateUser(ctx echo.Context) error {
+	uid := userIdFromContext(ctx)
+	var c services.UpdateUserCommand
+	err := ctx.Bind(&c)
+	if err != nil {
+		return err
+	}
+	return services.UpdateUser(uid, c).Send(ctx)
 }

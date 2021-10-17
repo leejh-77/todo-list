@@ -30,13 +30,15 @@ export default {
       if (!this.validateParams()) {
         return
       }
-      service.signup(this.email, this.password, this.username, res => {
-        if (res.status === 201) {
-          this.$router.push('/login')
-        } else {
-          alert("failed to signup")
-        }
-      })
+      service.signup(this.email, this.password, this.username)
+          .then(res => {
+            console.log(res)
+            this.$router.push('/login')
+          })
+          .catch(e => {
+            console.log(e)
+            alert("failed to signup")
+          })
     },
     validateParams : function() {
       if (this.email.length === 0) {
