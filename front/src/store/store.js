@@ -15,7 +15,7 @@ export default new Vuex.Store({
             id: 0,
             username: '',
             emailAddress: '',
-            imageUrl: null,
+            image: null,
             authenticated: false
         },
         workspace: {
@@ -29,6 +29,7 @@ export default new Vuex.Store({
     },
     mutations: {
         setUser(state, user) {
+            console.log(user)
             user.authenticated = true
             state.user = user
         },

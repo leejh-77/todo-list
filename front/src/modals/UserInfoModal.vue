@@ -24,11 +24,12 @@ export default {
     return {
       username: '',
       imageSrc: '',
+      imageChanged: false
     }
   },
   computed: {
     ...mapGetters([
-        'user'
+      'user'
     ]),
   },
   methods: {
@@ -42,27 +43,46 @@ export default {
         let reader = new FileReader();
         reader.onload = function (e) {
           vue.imageSrc = e.target.result;
+          vue.imageChanged = true
         }
         reader.readAsDataURL(file);
       }
     },
     actionSave() {
-      let base64 = this.imageSrc.replace(/^data:(.*,)?/, '');
-      userService.update(base64, this.username)
-      .then(res => {
-        console.log(res)
-        this.actionClose()
-      })
-      .catch(e => console.log(e))
+      var image
+      if (this.imageChanged) {
+        image = this.imageFromSource()
+      }
+      userService.update(image, this.username)
+          .then(res => {
+            this.$store.commit('setUser', res.data)
+            this.actionClose()
+          })
+          .catch(e => console.log(e))
+    },
+    imageFromSource() {
+      let idx = this.imageSrc.indexOf(',')
+      let base64 = this.imageSrc.substring(idx + 1, this.imageSrc.length);
+
+      idx = this.imageSrc.indexOf(';')
+      let type = this.imageSrc.substring(0, idx)
+      idx = type.indexOf(':')
+      type = type.substring(idx + 1, type.length)
+      return {
+        data: base64,
+        type: type
+      }
     }
   },
   mounted() {
     this.username = this.user.username
-    let url = this.user.imageUrl
-    if (url == null) {
-      url = require('../assets/user_icon.png')
+    let image = this.user.image
+    if (image == null) {
+      image = require('../assets/user_icon.png')
+    } else {
+      image = "data:" + image.type + ";base64," + image.data
     }
-    this.imageSrc = url
+    this.imageSrc = image
   }
 }
 </script>
@@ -76,6 +96,7 @@ export default {
 .image {
   width: 150px;
   margin-top: 50px;
+  border-radius: 50%;
 }
 
 .image-input-label {

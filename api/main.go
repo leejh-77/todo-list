@@ -8,17 +8,17 @@ import (
 	"todo-list/controllers"
 	"todo-list/models"
 	"todo-list/orm"
+	"todo-list/utils"
 )
 
 func initORM() {
 	orm.Init(base.DBConfig)
 	models.RegisterTables()
 
-
-}
-
-func createImageDir() {
-
+	err := utils.CreateImageDir()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {

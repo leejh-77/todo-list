@@ -6,7 +6,7 @@
     </div>
     <div class="user-info">
       <div class="user-info-profile">
-        <img class="user-icon" :src="getUserImageUrl"/>
+        <img class="user-icon" :src="getImageSource"/>
         <p class="user-name">{{ user.username }}</p>
       </div>
       <div class="user-info-dropdown">
@@ -49,12 +49,14 @@ export default {
     ...mapGetters([
         'user'
     ]),
-    getUserImageUrl() {
-      let url = this.user.imageUrl
-      if (url == null) {
-        url = require('../assets/user_icon.png')
+    getImageSource() {
+      let image = this.user.image
+      if (image == null) {
+        image = require('../assets/user_icon.png')
+      } else {
+        image = "data:" + image.type + ";base64," + image.data
       }
-      return url
+      return image
     }
   },
   mounted() {
@@ -122,6 +124,7 @@ export default {
 
 .user-icon {
   width: 40px;
+  border-radius: 50%;
   float: left;
   margin-right: 10px;
 }

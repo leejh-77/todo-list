@@ -8,6 +8,25 @@ export default {
                 .catch(e => reject(e))
         })
     },
+    update(image, username) {
+        let data
+        if (image) {
+            data = {
+                image: image,
+                username: username
+            }
+        } else {
+            data = {
+                username: username
+            }
+        }
+        console.log(data)
+        return new Promise((resolve, reject) => {
+            axios.put('/api/users', data)
+                .then(res => resolve(res))
+                .catch(e => reject(e))
+        })
+    },
     login(email, password) {
         let data = {
             emailAddress: email,
@@ -31,15 +50,5 @@ export default {
                 .catch(e => reject(e))
         })
     },
-    update(imageData, username) {
-        let data = {
-            image: imageData,
-            username: username
-        }
-        return new Promise((resolve, reject) => {
-            axios.put('/api/user', data)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
-        })
-    }
+
 }
