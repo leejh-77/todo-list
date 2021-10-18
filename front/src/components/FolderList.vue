@@ -1,5 +1,5 @@
 <template>
-  <v-card height="700" width="256">
+  <v-card height="700" width="256" class="main-page">
     <v-navigation-drawer permanent>
       <v-list-item class="workspace-info">
         <v-list-item-content>
@@ -35,6 +35,7 @@ import {mapGetters} from "vuex";
 import workspaceService from "../service/workspace";
 import folderService from "../service/folder";
 import AddFolderModal from "../modals/AddFolderModal";
+import $ from 'jquery'
 
 export default {
   name: "FolderList",
@@ -52,8 +53,8 @@ export default {
       showAddFolderModal: false
     }
   },
-  mounted() {
-    this.getWorkspaceData()
+  created() {
+      this.getWorkspaceData()
   },
   methods: {
     isSelectedFolder(folder) {
@@ -65,23 +66,22 @@ export default {
     getWorkspaceData() {
       workspaceService.getWorkspace(this.$route.query.workspaceId)
           .then(res => {
-            console.log(res.data)
             this.$store.commit('setWorkspace', res.data)
             this.getFolderData()
-          })
-          .catch(e => {
-            console.log(e)
           })
     },
     getFolderData() {
       folderService.getFolders(this.$store.state.workspace.id)
           .then(res => {
-            if (res.status === 200) {
-              this.folders = res.data == null ? [] : res.data
-              this.$store.commit('setFolder', this.folders[0])
-            } else {
-              alert('something wrong')
-            }
+            this.folders = res.data == null ? [] : res.data
+            this.$store.commit('setFolder', this.folders[0])
+            $('.main-page').css({
+              'opacity': '0',
+              'display': 'block'
+            }).show().animate({opacity: 1})
+          })
+          .catch(() => {
+            alert('something wrong')
           })
     },
     actionShowAddFolderModal() {
@@ -91,7 +91,6 @@ export default {
       this.showAddFolderModal = false
     },
     onFolderCreated(folder) {
-      console.log(folder)
       this.folders.push(folder)
     }
   }
@@ -114,10 +113,6 @@ export default {
   height: 20px;
 }
 
-.selected-folder-item {
-  background: lightgray;
-}
-
 .add-folder-button {
   background: cornflowerblue;
 }
@@ -126,5 +121,8 @@ export default {
   color: white;
 }
 
+.main-page {
+  display: none;
+}
 
 </style>

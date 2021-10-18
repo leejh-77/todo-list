@@ -22,6 +22,8 @@
 
 import {mapGetters} from "vuex";
 import UserInfoModal from "../modals/UserInfoModal";
+import userService from '../service/user'
+import $ from "jquery";
 
 export default {
   name: "MainHeader",
@@ -33,16 +35,25 @@ export default {
   },
   methods: {
     actionGoToHome() {
-      console.log('go to home')
+      this.$router.push('/')
     },
     actionShowProfile() {
       this.showUserInfoModal = true
     },
     actionLogout() {
-
+      userService.logout()
+      .then(() => {
+        this.$router.push('/login')
+      })
     },
     closeModal() {
       this.showUserInfoModal = false
+    },
+    showUserInfo() {
+      $('.user-info').css({
+        'opacity': '0',
+        'display': 'block'
+      }).show().animate({opacity: 1})
     }
   },
   computed: {
@@ -57,10 +68,22 @@ export default {
         image = "data:" + image.type + ";base64," + image.data
       }
       return image
+    },
+    getUser() {
+      return this.$store.state.user
+    }
+  },
+  watch: {
+    getUser() {
+      this.showUserInfo()
     }
   },
   mounted() {
-    this.$store.dispatch('loadMe')
+    if (!this.user.authenticated) {
+      this.$store.dispatch('loadMe')
+    } else {
+      this.showUserInfo()
+    }
   }
 }
 </script>
@@ -96,7 +119,7 @@ export default {
   cursor: pointer;
   position: absolute;
   right: 0;
-  display: block;
+  display: none;
   align-content: center;
   line-height: 40px;
   z-index: 1;
@@ -111,6 +134,8 @@ export default {
   position: relative;
   display: none;
   background: white;
+  border-radius: 10%;
+  box-shadow: 0px 0px 20px #cccccc;
 }
 
 .user-info:hover .user-info-dropdown {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-page">
     <h1 class="app-title">Todo List</h1>
     <b-list-group id="workspace-list">
       <b-list-group-item id="workspace-list-item" v-for="workspace in workspaces" :key="workspace.id"
@@ -24,6 +24,7 @@
 
 import service from "../service/workspace";
 import Modal from "../modals/Modal";
+import $ from 'jquery'
 
 export default {
   name: "Workspaces",
@@ -44,19 +45,20 @@ export default {
       this.newWorkspaceName = ''
     },
     actionAddWorkspace: function () {
-      service.addWorkspace(this.newWorkspaceName, res => {
-        if (res.status === 200) {
-          this.getWorkspaces()
-        }
-        this.showModal = false
-      })
+      service.addWorkspace(this.newWorkspaceName)
+          .then(() => {
+            this.getWorkspaces()
+          })
+      this.showModal = false
     },
     actionMoveToWorkspace: function (id) {
       this.$router.push('todo?workspaceId=' + id)
     },
     getWorkspaces: function () {
-      service.getWorkspaces(res => {
+      service.getWorkspaces()
+      .then(res => {
         this.workspaces = res.data == null ? [] : res.data
+        $('.main-page').css("display", "block")
       })
     },
   },
@@ -67,6 +69,10 @@ export default {
 </script>
 
 <style scoped>
+
+.main-page {
+  display: none;
+}
 
 .app-title {
   margin-top: 20px;

@@ -27,6 +27,7 @@ import {TodoStatus} from "../const";
 import {mapGetters} from "vuex";
 import todoService from '../service/todo'
 import EditTodoModal from "../modals/EditTodoModal";
+import $ from 'jquery'
 
 export default {
   name: "TodoCards",
@@ -141,6 +142,10 @@ export default {
       .then(res => {
         this.todos = res.data
         this.alignTodos()
+        $('.page-body').css({
+          'opacity': '0',
+          'display': 'block'
+        }).show().animate({opacity: 1})
       })
     },
     alignTodos() {
@@ -181,7 +186,8 @@ export default {
 <style scoped>
 
 .page-body {
-  height: 700px;
+  display: none;
+  min-height: 700px;
   margin-top: 10px;
   margin-left: 270px;
   position: relative;

@@ -2,11 +2,7 @@ import axios from "axios";
 
 export default {
     getMe() {
-        return new Promise((resolve, reject) => {
-            axios.get('/api/users/me')
-                .then(res => resolve(res))
-                .catch(e => reject(e))
-        })
+        return axios.get('/api/users/me')
     },
     update(image, username) {
         let data
@@ -20,34 +16,22 @@ export default {
                 username: username
             }
         }
-        console.log(data)
-        return new Promise((resolve, reject) => {
-            axios.put('/api/users', data)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
-        })
+        return axios.put('/api/users', data)
     },
     login(email, password) {
-        let data = {
+        return axios.post('/login', {
             emailAddress: email,
             password: password
-        }
-        return new Promise((resolve, reject) => {
-            axios.post('/login', data)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
         })
     },
+    logout() {
+        return axios.post('/logout')
+    },
     signup(email, password, username) {
-        let data = {
+        return axios.post("/signup", {
             emailAddress: email,
             password: password,
             username: username
-        }
-        return new Promise((resolve, reject) => {
-            axios.post("/signup", data)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
         })
     },
 

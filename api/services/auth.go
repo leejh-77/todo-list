@@ -73,6 +73,16 @@ func LogIn(ctx echo.Context, c LogInCommand) *result.ApiResult {
 	return result.Success("")
 }
 
+func LogOut(ctx echo.Context) *result.ApiResult {
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = ""
+	cookie.HttpOnly = true
+	cookie.MaxAge = 0
+	ctx.SetCookie(cookie)
+	return result.Success("")
+}
+
 func encryptPassword(p string) (*string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(p), 10)
 	if err != nil {

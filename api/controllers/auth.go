@@ -13,6 +13,7 @@ func (c AuthController) Init(g *echo.Group) {
 	// auth
 	g.POST("/signup", signUp)
 	g.POST("/login", logIn)
+	g.POST("/logout", logOut)
 }
 
 func signUp(ctx echo.Context) error {
@@ -31,4 +32,8 @@ func logIn(ctx echo.Context) error {
 		return err
 	}
 	return services.LogIn(ctx, c).Send(ctx)
+}
+
+func logOut(ctx echo.Context) error {
+	return services.LogOut(ctx).Send(ctx)
 }

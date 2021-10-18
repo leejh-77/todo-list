@@ -2,21 +2,12 @@ import axios from "axios";
 
 export default {
     getFolders(workspaceId) {
-        return new Promise((resolve, reject) => {
-            axios.get('/api/folders?workspaceId=' + workspaceId)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
-        })
+        return axios.get('/api/folders?workspaceId=' + workspaceId)
     },
     addFolder(workspaceId, folderName) {
-        let data = {
+        return axios.post('/api/folders', {
             "workspaceId" : workspaceId,
             "name" : folderName
-        }
-        return new Promise((resolve, reject) => {
-            axios.post('/api/folders', data)
-                .then(res => resolve(res))
-                .catch(e => reject(e))
         })
     }
 }
