@@ -27,12 +27,10 @@ export default {
   methods: {
     actionLogin: function () {
       service.login(this.email, this.password)
-          .then(res => {
-            console.log(res)
+          .then(() => {
             this.$router.push('/')
           })
-          .catch(e => {
-            console.log(e)
+          .catch(() => {
             alert("email or password is incorrect")
           })
     },

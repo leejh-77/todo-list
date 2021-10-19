@@ -14,6 +14,7 @@ export default {
   },
   created() {
     bus.$on(ServerError.Unauthenticated, () => {
+      alert('session has been expired. please login again')
       this.$router.push('/login')
     })
   }
@@ -33,10 +34,6 @@ export default {
 
 html, body {
   height: 100%;
-}
-
-b-button {
-  color: white;
 }
 
 </style>

@@ -33,14 +33,12 @@ export default {
   methods: {
     actionAddFolder() {
       let wid = this.workspace.id
-      console.log(wid)
       service.addFolder(wid, this.inputString)
       .then(res => {
         this.$emit('created', res.data)
         this.actionCloseModal()
       })
-      .catch(e => {
-        console.log(e)
+      .catch(() => {
         this.actionCloseModal()
       })
     },

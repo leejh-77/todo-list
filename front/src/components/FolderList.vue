@@ -77,15 +77,11 @@ export default {
     getWorkspaceData() {
       workspaceService.getWorkspace(this.$route.query.workspaceId)
           .then(res => {
-            console.log(res)
             this.$store.commit('setWorkspace', res.data)
             $('.main-page').css({
               'opacity': '0',
               'display': 'block'
             }).show().animate({opacity: 1})
-          })
-          .catch(() => {
-            alert('something wrong')
           })
     },
     actionShowAddFolderModal() {

@@ -128,6 +128,15 @@ func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 	return result.Success(nil)
 }
 
+func SearchWorkspace(name string) *result.ApiResult {
+	var ws []models.Workspace
+	err := models.WorkspaceQuery(orm.Engine).FindByNameLike(&ws, name)
+	if err != nil {
+		return result.ServerError(err)
+	}
+	return result.Success(ws)
+}
+
 func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
 	if len(c.Name) == 0 {
 		return errors.New("name must not be empty")

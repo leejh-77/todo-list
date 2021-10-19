@@ -15,6 +15,7 @@ func (w WorkspaceController) Init(g *echo.Group) {
 	g.GET("/:id", getWorkspace)
 	g.POST("", createWorkspace)
 	g.DELETE("/:id", deleteWorkspace)
+	g.GET("/search", searchWorkspace)
 }
 
 func getWorkspaces(ctx echo.Context) error {
@@ -50,4 +51,9 @@ func deleteWorkspace(ctx echo.Context) error {
 		return err
 	}
 	return services.DeleteWorkspace(uid, int64(wid)).Send(ctx)
+}
+
+func searchWorkspace(ctx echo.Context) error {
+	param := ctx.QueryParam("name")
+	return services.SearchWorkspace(param).Send(ctx)
 }

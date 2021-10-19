@@ -122,8 +122,7 @@ export default {
     },
     onDelete(todo) {
       todoService.deleteTodo(todo.id)
-      .then(res => {
-        console.log(res)
+      .then(() => {
         for (var i = 0; i < this.todos.length; i++) {
           if (todo.id === this.todos[i].id) {
             this.todos.splice(i, 1)

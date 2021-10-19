@@ -11,5 +11,8 @@ export default {
         return axios.post("/api/workspaces", {
             'name' : name
         })
+    },
+    searchWorkspace(name) {
+        return axios.get("/api/workspaces/search?name=" + name)
     }
 }

@@ -31,12 +31,10 @@ export default {
         return
       }
       service.signup(this.email, this.password, this.username)
-          .then(res => {
-            console.log(res)
+          .then(() => {
             this.$router.push('/login')
           })
-          .catch(e => {
-            console.log(e)
+          .catch(() => {
             alert("failed to signup")
           })
     },

@@ -58,7 +58,6 @@ export default {
             this.$store.commit('setUser', res.data)
             this.actionClose()
           })
-          .catch(e => console.log(e))
     },
     imageFromSource() {
       let idx = this.imageSrc.indexOf(',')
