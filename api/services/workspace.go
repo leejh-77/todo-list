@@ -6,6 +6,7 @@ import (
 	"todo-list/models"
 	"todo-list/orm"
 	"todo-list/result"
+	"todo-list/utils"
 )
 
 type CreateWorkspaceCommand struct {
@@ -14,6 +15,21 @@ type CreateWorkspaceCommand struct {
 
 type DeleteWorkspaceCommand struct {
 	WorkspaceId int64 `json:"workspaceId"`
+}
+
+type GetWorkspaceResponse struct {
+	Id int64 `json:"id"`
+	Name string `json:"name"`
+	CreatedTime int64 `json:"createdTime"`
+	Members []WorkspaceMemberResponse `json:"members"`
+	Folders []models.Folder `json:"folders"`
+}
+
+type WorkspaceMemberResponse struct {
+	UserId int64 `json:"userId"`
+	Name string `json:"name"`
+	Image *utils.Base64Image `json:"image"`
+	Type int `json:"type"`
 }
 
 func GetWorkspaces(uid int64) *result.ApiResult {
@@ -31,7 +47,44 @@ func GetWorkspace(uid int64, wid int64) *result.ApiResult {
 	if err != nil {
 		return result.ServerError(err)
 	}
-	return result.Success(w)
+
+	var fs []models.Folder
+	err = models.FolderQuery(orm.Engine).FindByWorkspaceId(&fs, wid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+
+	var ms []models.WorkspaceMember
+	err = models.WorkspaceMemberQuery(orm.Engine).FindByWorkspaceId(&ms, wid)
+	if err != nil {
+		return result.ServerError(err)
+	}
+
+	res := &GetWorkspaceResponse{}
+	res.Id = w.Id
+	res.Name = w.Name
+	res.CreatedTime = w.CreatedTime
+	res.Folders = fs
+
+	members := make([]WorkspaceMemberResponse, 0, len(ms))
+	for _, m := range ms {
+		var u models.User
+		err = orm.Table(models.TableUser).FindById(&u, m.UserId)
+		if err != nil {
+			return result.ServerError(err)
+		}
+		mr := WorkspaceMemberResponse{}
+		mr.UserId = u.Id
+		mr.Name = u.Username
+		mr.Type = m.Type
+		mr.Image, err = utils.ReadImage(u.Id)
+		if err != nil {
+			return result.ServerError(err)
+		}
+		members = append(members, mr)
+	}
+	res.Members = members
+	return result.Success(res)
 }
 
 func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
@@ -39,13 +92,19 @@ func CreateWorkspace(uid int64, c CreateWorkspaceCommand) *result.ApiResult {
 	if err != nil {
 		return result.BadRequest(err.Error())
 	}
+
+	var ws *models.Workspace
 	err = orm.InTransaction(func(e orm.Session) error {
-		return createWorkspace(c, uid, e)
+		ws, err = createWorkspace(c, uid, e)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 	if err != nil {
 		return result.ServerError(err)
 	}
-	return result.Created()
+	return result.Success(ws)
 }
 
 func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
@@ -76,14 +135,14 @@ func validateCreateWorkspaceCommand(c CreateWorkspaceCommand) error {
 	return nil
 }
 
-func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Session) error {
+func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Session) (*models.Workspace, error) {
 	ws := &models.Workspace{
 		Name:        c.Name,
 		CreatedTime: time.Now().Unix(),
 	}
 	id, err := e.Table(models.TableWorkspace).Insert(ws)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	m := &models.WorkspaceMember{
 		Type:        models.MemberTypeOwner,
@@ -92,9 +151,9 @@ func createWorkspace(c CreateWorkspaceCommand, uid int64, e orm.Session) error {
 	}
 	_, err = e.Table(models.TableWorkspaceMember).Insert(m)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return ws, nil
 }
 
 func deleteWorkspace(wid int64, e orm.Session) error {

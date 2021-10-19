@@ -18,15 +18,17 @@ func (c UserController) Init(g *echo.Group)  {
 func getUser(ctx echo.Context) error {
 	param := ctx.Param("id")
 	var uid int64
+	uid = userIdFromContext(ctx)
+
 	if param == "me" {
-		uid = userIdFromContext(ctx)
-	} else {
-		v, err := strconv.Atoi(param)
-		if err != nil {
-			return err
-		}
-		uid = int64(v)
+		return services.GetMe(uid).Send(ctx)
 	}
+
+	v, err := strconv.Atoi(param)
+	if err != nil {
+		return err
+	}
+	uid = int64(v)
 	return services.GetUser(uid).Send(ctx)
 }
 

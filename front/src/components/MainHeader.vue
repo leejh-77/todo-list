@@ -116,6 +116,7 @@ export default {
 }
 
 .user-info {
+  margin-top: 7px;
   cursor: pointer;
   position: absolute;
   right: 0;

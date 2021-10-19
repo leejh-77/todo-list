@@ -87,7 +87,7 @@ ul {
 }
 
 #workspace-list-item {
-  margin: 10px;
+  /*margin: 10px;*/
 }
 
 #workspace-list-item:hover {

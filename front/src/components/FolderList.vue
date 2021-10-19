@@ -1,7 +1,19 @@
 <template>
   <v-card height="700" width="256" class="main-page">
+    <div class="workspace-selector">
+      <v-list-item class="workspace-selector-item"
+                   v-for="workspace in workspaces"
+                   :key="workspace.id" @click="onSelectWorkspace(workspace)">
+        <v-list-item-content>
+          <v-list-item-title class="text-h6">{{ workspace.name }}</v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-icon class="workspace-selector-icon" v-if="isSelectedWorkspace(workspace)">
+          <v-img src="../assets/check.png"/>
+        </v-list-item-icon>
+      </v-list-item>
+    </div>
     <v-navigation-drawer permanent>
-      <v-list-item class="workspace-info">
+      <v-list-item class="workspace-info" @click="actionShowWorkspaceSelector">
         <v-list-item-content>
           <v-list-item-title class="text-h6">{{ workspace.name }}</v-list-item-title>
         </v-list-item-content>
@@ -13,7 +25,7 @@
       <v-divider style="margin: 0"/>
 
       <v-list dense nav>
-        <v-list-item v-for="folder in folders" :key="folder.id" link
+        <v-list-item v-for="folder in workspace.folders" :key="folder.id" link
                      :class="isSelectedFolder(folder) ? 'selected-folder-item' : ''" @click="onSelectFolder(folder)">
           <v-list-item-content>
             <v-list-item-title>{{ folder.name }}</v-list-item-title>
@@ -33,7 +45,6 @@
 <script>
 import {mapGetters} from "vuex";
 import workspaceService from "../service/workspace";
-import folderService from "../service/folder";
 import AddFolderModal from "../modals/AddFolderModal";
 import $ from 'jquery'
 
@@ -43,13 +54,13 @@ export default {
     ...mapGetters([
       'user',
       'workspace',
+      'workspaces',
       'folder'
     ]),
   },
   components: {AddFolderModal},
   data() {
     return {
-      folders: [],
       showAddFolderModal: false
     }
   },
@@ -66,15 +77,8 @@ export default {
     getWorkspaceData() {
       workspaceService.getWorkspace(this.$route.query.workspaceId)
           .then(res => {
+            console.log(res)
             this.$store.commit('setWorkspace', res.data)
-            this.getFolderData()
-          })
-    },
-    getFolderData() {
-      folderService.getFolders(this.$store.state.workspace.id)
-          .then(res => {
-            this.folders = res.data == null ? [] : res.data
-            this.$store.commit('setFolder', this.folders[0])
             $('.main-page').css({
               'opacity': '0',
               'display': 'block'
@@ -91,7 +95,18 @@ export default {
       this.showAddFolderModal = false
     },
     onFolderCreated(folder) {
-      this.folders.push(folder)
+      this.workspace.folders.push(folder)
+    },
+    actionShowWorkspaceSelector() {
+      $('.workspace-selector').css('display', 'block')
+    },
+    isSelectedWorkspace(workspace) {
+      return this.workspace.id === workspace.id
+    },
+    onSelectWorkspace(workspace) {
+      this.$router.push('todo?workspaceId=' + workspace.id)
+      this.getWorkspaceData()
+      $('.workspace-selector').css('display', 'none')
     }
   }
 }
@@ -123,6 +138,30 @@ export default {
 
 .main-page {
   display: none;
+}
+
+.selected-folder-item {
+  background: lightgray;
+}
+
+.workspace-selector {
+  margin-top: 10px;
+  display: none;
+  width: 100%;
+  position: absolute;
+  background: white;
+  z-index: 10;
+  box-shadow: 0 0 20px #cccccc;
+}
+
+.workspace-selector-item:hover {
+  cursor: pointer;
+  background: #cccccc;
+}
+
+.workspace-selector-icon {
+  width: 15px;
+  height: 20px;
 }
 
 </style>

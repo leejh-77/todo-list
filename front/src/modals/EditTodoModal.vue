@@ -2,11 +2,11 @@
   <v-app>
     <Modal class="todo-modal" @close="actionClose">
       <div class="todo-subject">
-        <h5 class="input-title">Subject</h5>
+        <h6 class="input-title">Subject</h6>
         <b-input v-model="todo.subject"/>
       </div>
       <div class="todo-status">
-        <h5 class="input-title">Status</h5>
+        <h6 class="input-title">Status</h6>
         <v-container fluid class="todo-status-select">
           <v-row align="center">
             <v-col class="d-flex" cols="12" sm="6">
@@ -19,7 +19,7 @@
         </v-container>
       </div>
       <div class="todo-body">
-        <h5 class="input-title">Body</h5>
+        <h6 class="input-title">Body</h6>
         <b-textarea class="todo-body-text" v-model="todo.body"/>
       </div>
       <template slot="footer">

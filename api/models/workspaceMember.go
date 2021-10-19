@@ -8,10 +8,10 @@ const (
 )
 
 type WorkspaceMember struct {
-	Id int64
-	Type int
-	WorkspaceId int64
-	UserId int64
+	Id int64 `json:"id"`
+	Type int `json:"type"`
+	WorkspaceId int64 `json:"workspaceId"`
+	UserId int64 `json:"userId"`
 }
 
 type workspaceMemberQuery struct {

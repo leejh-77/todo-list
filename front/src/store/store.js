@@ -8,6 +8,7 @@ export default new Vuex.Store({
     getters: {
         user: state => state.user,
         workspace: state => state.workspace,
+        workspaces: state => state.workspaces,
         folder: state => state.folder
     },
     state: {
@@ -18,9 +19,12 @@ export default new Vuex.Store({
             authenticated: false,
             image: null,
         },
+        workspaces: [],
         workspace: {
             id: 0,
-            name: ''
+            name: '',
+            folders: [],
+            members: []
         },
         folder: {
             id: 0,
@@ -33,8 +37,19 @@ export default new Vuex.Store({
             state.user = user
             state.user.authenticated = true
         },
+        setWorkspaces(state, workspaces) {
+            state.workspaces = workspaces
+        },
         setWorkspace(state, workspace) {
+            if (workspace.folders == null) {
+                workspace.folders = []
+            }
             state.workspace = workspace
+            if (workspace.folders.length > 0) {
+                state.folder = workspace.folders[0]
+            } else {
+                state.folder = null
+            }
         },
         setFolder(state, folder) {
             state.folder = folder
@@ -44,6 +59,7 @@ export default new Vuex.Store({
         loadMe({commit}) {
             return userService.getMe().then(res => {
                 commit('setUser', res.data)
+                commit('setWorkspaces', res.data.workspaces)
             })
         }
     }

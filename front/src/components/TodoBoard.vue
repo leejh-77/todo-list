@@ -124,8 +124,7 @@ export default {
       todoService.deleteTodo(todo.id)
       .then(res => {
         console.log(res)
-        var i
-        for (i = 0; i < this.todos.length; i++) {
+        for (var i = 0; i < this.todos.length; i++) {
           if (todo.id === this.todos[i].id) {
             this.todos.splice(i, 1)
             break
@@ -138,6 +137,12 @@ export default {
       console.log('todo moved', evt2)
     },
     loadTodos() {
+      if (this.folder == null || this.folder.id === 0) {
+        this.cardLists[0].todos = []
+        this.cardLists[1].todos = []
+        this.cardLists[2].todos = []
+        return
+      }
       todoService.getTodos(this.folder.id)
       .then(res => {
         this.todos = res.data
