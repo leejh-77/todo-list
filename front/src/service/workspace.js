@@ -14,5 +14,8 @@ export default {
     },
     searchWorkspace(name) {
         return axios.get("/api/workspaces/search?name=" + name)
+    },
+    addWorkspaceMember(wid) {
+        return axios.post('api/workspaces/' + wid + '/members')
     }
 }

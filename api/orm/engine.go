@@ -123,8 +123,7 @@ func typeString(p reflect.Type) string {
 		return "TINYINT"
 	case reflect.Int16:
 		return "SMALLINT"
-	case reflect.Int:
-	case reflect.Int32:
+	case reflect.Int, reflect.Int32:
 		return "INT"
 	case reflect.Int64:
 		return "BIGINT"

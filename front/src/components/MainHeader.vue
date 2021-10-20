@@ -22,7 +22,6 @@
 
 import {mapGetters} from "vuex";
 import UserInfoModal from "../modals/UserInfoModal";
-import userService from '../service/user'
 import $ from "jquery";
 
 export default {
@@ -41,10 +40,7 @@ export default {
       this.showUserInfoModal = true
     },
     actionLogout() {
-      userService.logout()
-      .then(() => {
-        this.$router.push('/login')
-      })
+      this.$store.dispatch('logout')
     },
     closeModal() {
       this.showUserInfoModal = false
@@ -79,6 +75,7 @@ export default {
     }
   },
   mounted() {
+    console.log(this.user)
     if (!this.user.authenticated) {
       this.$store.dispatch('loadMe')
     } else {

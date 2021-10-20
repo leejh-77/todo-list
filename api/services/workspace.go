@@ -128,9 +128,9 @@ func DeleteWorkspace(uid int64, wid int64) *result.ApiResult {
 	return result.Success(nil)
 }
 
-func SearchWorkspace(name string) *result.ApiResult {
+func SearchWorkspace(uid int64, name string) *result.ApiResult {
 	var ws []models.Workspace
-	err := models.WorkspaceQuery(orm.Engine).FindByNameLike(&ws, name)
+	err := models.WorkspaceQuery(orm.Engine).FindByNameLike(&ws, uid, name)
 	if err != nil {
 		return result.ServerError(err)
 	}

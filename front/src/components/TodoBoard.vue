@@ -137,20 +137,22 @@ export default {
     },
     loadTodos() {
       if (this.folder == null || this.folder.id === 0) {
+        $('.list').css('display', 'none')
         this.cardLists[0].todos = []
         this.cardLists[1].todos = []
         this.cardLists[2].todos = []
-        return
+      } else {
+        $('.list').css('display', 'flex')
+        todoService.getTodos(this.folder.id)
+            .then(res => {
+              this.todos = res.data
+              this.alignTodos()
+              $('.page-body').css({
+                'opacity': '0',
+                'display': 'block'
+              }).show().animate({opacity: 1})
+            })
       }
-      todoService.getTodos(this.folder.id)
-      .then(res => {
-        this.todos = res.data
-        this.alignTodos()
-        $('.page-body').css({
-          'opacity': '0',
-          'display': 'block'
-        }).show().animate({opacity: 1})
-      })
     },
     alignTodos() {
       let notStarted = this.cardLists[0]

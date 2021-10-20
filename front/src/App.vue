@@ -14,7 +14,9 @@ export default {
   },
   created() {
     bus.$on(ServerError.Unauthenticated, () => {
-      alert('session has been expired. please login again')
+      this.$router.push('/login')
+    })
+    bus.$on('logout', () => {
       this.$router.push('/login')
     })
   }

@@ -20,7 +20,8 @@ func (q *workspaceQuery) FindByUserId(ws *[]Workspace, uid int64) error {
 	return q.s.Table(TableWorkspace).Find(ws, "id IN (SELECT workspaceId FROM workspaceMembers WHERE userId = ?)", uid)
 }
 
-func (q *workspaceQuery) FindByNameLike(ws *[]Workspace, name string) error {
+func (q *workspaceQuery) FindByNameLike(ws *[]Workspace, uid int64, name string) error {
 	name = "%" + name + "%"
-	return q.s.Table(TableWorkspace).Find(ws, "name LIKE ?", name)
+	return q.s.Table(TableWorkspace).Find(ws, "name LIKE ? AND id NOT IN (SELECT workspaceId FROM " +
+		TableWorkspaceMember + " WHERE userId = ?)", name, uid)
 }

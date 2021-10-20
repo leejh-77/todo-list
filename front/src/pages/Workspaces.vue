@@ -18,7 +18,10 @@
         <b-button @click="actionAddWorkspace">Add</b-button>
       </template>
     </Modal>
-    <SearchWorkspaceModal class="search-modal" @close="actionCloseSearchModal" v-if="showSearchModal"/>
+    <SearchWorkspaceModal class="search-modal"
+                          @close="actionCloseSearchModal"
+                          @onAddWorkspace="onAddWorkspace"
+                          v-if="showSearchModal"/>
   </div>
 </template>
 
@@ -70,6 +73,10 @@ export default {
     },
     actionCloseSearchModal() {
       this.showSearchModal = false
+    },
+    onAddWorkspace() {
+      this.showModal = false
+      this.getWorkspaces()
     }
   },
   created() {

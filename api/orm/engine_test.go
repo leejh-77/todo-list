@@ -20,6 +20,7 @@ type Book struct {
 	Subject string
 	Author string
 	PublishedTime int64
+	Kind int
 }
 
 var tBook = "books"
