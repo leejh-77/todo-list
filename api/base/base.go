@@ -6,7 +6,7 @@ const JWTSecret = "todo-list-jwt-secret"
 
 var DBConfig = orm.DatabaseConfig{
 	Driver:   "mysql",
-	Host:     "host.docker.internal:3306",
+	Host:     "localhost:3306",
 	User:     "root",
 	Password: "1234",
 	Name:     "todo",

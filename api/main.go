@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -11,7 +12,17 @@ import (
 	"todo-list/utils"
 )
 
+
+
 func initORM() {
+	var docker bool
+	flag.BoolVar(&docker, "dockerBuild", false, "use docker build")
+	flag.Parse()
+
+	if docker {
+		base.DBConfig.Host = "host.docker.internal:3306"
+	}
+
 	orm.Init(base.DBConfig)
 	models.RegisterTables()
 

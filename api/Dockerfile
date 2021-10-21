@@ -10,4 +10,4 @@ COPY . .
 
 RUN go build -o main .
 
-ENTRYPOINT ["/app/main"]
+ENTRYPOINT ["/app/main", "-dockerBuild=true"]
