@@ -1,5 +1,13 @@
 FROM golang:alpine
 
-COPY todo-list todo-list
+ENV GO111MODULE=on \
+    GOOS=linux \
+    GOARCH=amd64
 
-ENTRYPOINT ["/todo-list"]
+WORKDIR /app
+
+COPY . .
+
+RUN go build -o main .
+
+ENTRYPOINT ["/app/main"]
