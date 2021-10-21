@@ -99,11 +99,11 @@ func validateSignupRequest(c SignUpCommand) error {
 		return errors.New("invalid emailAddress")
 	}
 	password := c.Password
-	if len(password) <= 4 {
+	if len(password) < 4 {
 		return errors.New("invalid password")
 	}
 	username := c.Username
-	if len(username) <= 4 {
+	if len(username) < 4 {
 		return errors.New("invalid username")
 	}
 	var u models.User

@@ -37,7 +37,8 @@ func CreateFolder(uid int64, c CreateFolderCommand) *result.ApiResult {
 		Name:        c.Name,
 		WorkspaceId: c.WorkspaceId,
 	}
-	_, err := orm.Table(models.TableFolder).Insert(&f)
+	id, err := orm.Table(models.TableFolder).Insert(&f)
+	f.Id = id
 	if err != nil {
 		return result.ServerError(err)
 	}

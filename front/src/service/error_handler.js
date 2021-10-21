@@ -4,6 +4,7 @@ import {ServerError} from "../const";
 
 export default {
     handle(e) {
+        console.log(e)
         let response = e.response
         if (response) {
             let status = response.status

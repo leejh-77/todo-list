@@ -240,7 +240,8 @@ func AddWorkspaceMember(uid int64, wid int64) *result.ApiResult {
 		WorkspaceId: wid,
 		UserId:      uid,
 	}
-	_, err = tr.Table(models.TableWorkspaceMember).Insert(&m)
+	id, err := tr.Table(models.TableWorkspaceMember).Insert(&m)
+	m.Id = id
 	if err != nil {
 		return result.ServerError(err)
 	}

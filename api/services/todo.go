@@ -70,7 +70,8 @@ func CreateTodo(uid int64, c CreateTodoCommand) *result.ApiResult {
 		CompletedTime: c.CompletedTime,
 		Position:      c.Position,
 	}
-	_, err = orm.Table(models.TableTodo).Insert(todo)
+	id, err := orm.Table(models.TableTodo).Insert(todo)
+	todo.Id = id
 	if err != nil {
 		return result.ServerError(err)
 	}

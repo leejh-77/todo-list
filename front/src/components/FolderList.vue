@@ -92,6 +92,7 @@ export default {
     },
     onFolderCreated(folder) {
       this.workspace.folders.push(folder)
+      this.actionCloseAddFolderModal()
     },
     actionShowWorkspaceSelector() {
       $('.workspace-selector').css('display', 'block')

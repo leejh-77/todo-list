@@ -6,6 +6,9 @@
         <div class="card" v-for="todo in list.todos" :key="todo.id" @click="actionUpdateTodo(todo)">
           <p class="card-subject">{{todo.subject}}</p>
           <p class="card-body">{{todo.body}}</p>
+          <div>
+            <img class="card-user-profile" :src="getImage(todo.userId)"/>
+          </div>
         </div>
       </draggable>
       <div class="card-add-button" @click="actionCreateNewTodo(list.status)">
@@ -58,7 +61,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-        'folder'
+        'folder',
+        'workspace'
     ]),
     getFolder() {
       return this.folder
@@ -74,7 +78,8 @@ export default {
       this.editingTodo = {
         subject: '',
         body: '',
-        status: status
+        status: status,
+        position: -1
       }
       this.showTodoModal = true
     },
@@ -97,6 +102,8 @@ export default {
       todo.userId = this.$store.state.user.id
 
       if (todo.id == null) {
+        console.log(todo)
+        todo.position = this.lastPosition(todo.status) + 1
         todoService.createTodo(todo)
             .then(res => {
               this.todos.push(res.data)
@@ -129,11 +136,15 @@ export default {
             break
           }
         }
+        this.alignTodos()
+        this.actionCloseModal()
       })
     },
-    log(evt, evt2) {
+    log(evt) {
       console.log('todo moved', evt)
-      console.log('todo moved', evt2)
+      console.log(this.cardLists[0])
+      console.log(this.cardLists[1])
+      console.log(this.cardLists[2])
     },
     loadTodos() {
       if (this.folder == null || this.folder.id === 0) {
@@ -153,6 +164,37 @@ export default {
               }).show().animate({opacity: 1})
             })
       }
+    },
+    getImage(uid) {
+      let image
+      for (var i = 0; i < this.workspace.members.length; i++) {
+        let member = this.workspace.members[i]
+        if (member.userId === uid) {
+          image = member.image
+          break
+        }
+      }
+      if (image == null) {
+        image = require('../assets/user_icon.png')
+      } else {
+        image = "data:" + image.type + ";base64," + image.data
+      }
+      return image
+    },
+    lastPosition(status) {
+      let list
+      if (status === TodoStatus.NotStarted) {
+        list = this.cardLists[0].todos
+      } else if (status === TodoStatus.InProgress) {
+        list = this.cardLists[1].todos
+      } else {
+        list = this.cardLists[2].todos
+      }
+      if (list.length === 0) {
+        return -1
+      }
+      let last = list[list.length - 1]
+      return last.position
     },
     alignTodos() {
       let notStarted = this.cardLists[0]
@@ -240,6 +282,12 @@ export default {
 .card-body {
   text-align: left;
   padding: 0;
+}
+
+.card-user-profile {
+  width: 40px;
+  float: right;
+  border-radius: 50%;
 }
 
 .card-add-button {
