@@ -14,7 +14,7 @@ func (c TodoController) Init(g *echo.Group) {
 	g.GET("", getTodos)
 	g.POST("", createTodo)
 	g.PUT("/:id", updateTodo)
-	g.PUT("/:id/position", moveTodo)
+	g.PUT("/positions", updatePositions)
 	g.DELETE("/:id", deleteTodo)
 }
 
@@ -61,16 +61,11 @@ func deleteTodo(ctx echo.Context) error {
 	return services.DeleteTodo(userIdFromContext(ctx), int64(tid)).Send(ctx)
 }
 
-func moveTodo(ctx echo.Context) error {
-	param := ctx.Param("id")
-	tid, err := strconv.Atoi(param)
+func updatePositions(ctx echo.Context) error {
+	var c services.UpdatePositionsCommand
+	err := ctx.Bind(&c)
 	if err != nil {
 		return err
 	}
-	var c services.MoveTodoCommand
-	err = ctx.Bind(&c)
-	if err != nil {
-		return err
-	}
-	return services.MoveTodo(userIdFromContext(ctx), int64(tid), c).Send(ctx)
+	return services.UpdatePositions(c).Send(ctx)
 }

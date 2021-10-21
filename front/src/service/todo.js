@@ -12,5 +12,11 @@ export default {
     },
     deleteTodo(id) {
         return axios.delete('/api/todos/' + id)
+    },
+    updatePositions(status, positions) {
+        return axios.put('/api/todos/positions', {
+            status: status,
+            moveData: positions
+        })
     }
 }

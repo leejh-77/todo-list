@@ -14,7 +14,7 @@ type CreateTodoCommand struct {
 	Body          string  `json:"body"`
 	Status        int     `json:"status"`
 	CompletedTime int64   `json:"completedTime"`
-	Position      float32 `json:"position"`
+	Position      int64 `json:"position"`
 }
 
 type UpdateTodoCommand struct {
@@ -25,10 +25,14 @@ type UpdateTodoCommand struct {
 	CompletedTime optional.Int64  `json:"completedTime"`
 }
 
-type MoveTodoCommand struct {
-	FolderId int64
-	Status   optional.Int `json:"status"`
-	Position float32      `json:"position"`
+type UpdatePositionsCommand struct {
+	Status   int                           `json:"status"`
+	MoveData []UpdatePositionIdAndPosition `json:"moveData"`
+}
+
+type UpdatePositionIdAndPosition struct {
+	Id int64 `json:"id"`
+	Position int64 `json:"position"`
 }
 
 func (c *UpdateTodoCommand) hasChange() bool {
@@ -134,32 +138,27 @@ func DeleteTodo(uid int64, tid int64) *result.ApiResult {
 	return result.Success("")
 }
 
-func MoveTodo(uid int64, tid int64, c MoveTodoCommand) *result.ApiResult {
-	if tid == int64(0) {
-		return result.BadRequest("todo id must not be empty")
-	}
-	t, ret := findTodo(tid)
-	if ret != nil {
-		return ret
-	}
-	ret = checkFolderAuthority(uid, t.FolderId)
-	if ret != nil {
-		return ret
-	}
-	var todo models.Todo
-	err := orm.Table(models.TableTodo).FindById(&todo, tid)
+func UpdatePositions(c UpdatePositionsCommand) *result.ApiResult {
+	err := orm.InTransaction(func(s orm.Session) error {
+		for _, d := range c.MoveData {
+			var todo models.Todo
+			err := s.Table(models.TableTodo).FindById(&todo, d.Id)
+			if err != nil {
+				return err
+			}
+			todo.Position = d.Position
+			todo.Status = c.Status
+			err = s.Table(models.TableTodo).Update(&todo)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
-		return result.ServerError(err)
+		result.ServerError(err)
 	}
-	todo.Position = c.Position
-	if c.Status.Set {
-		todo.Status = c.Status.Value
-	}
-	err = orm.Table(models.TableTodo).Update(todo)
-	if err != nil {
-		return result.ServerError(err)
-	}
-	return result.Success(todo)
+	return result.Success("")
 }
 
 func findTodo(tid int64) (*models.Todo, *result.ApiResult) {

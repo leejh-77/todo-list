@@ -16,7 +16,7 @@ type Todo struct {
 	Body string `json:"body"`
 	Status int `json:"status"`
 	CompletedTime int64 `json:"completedTime"`
-	Position float32 `json:"position"`
+	Position int64 `json:"position"`
 }
 
 type todoQuery struct {

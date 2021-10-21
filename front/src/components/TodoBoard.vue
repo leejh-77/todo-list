@@ -2,7 +2,7 @@
   <div class="page-body">
     <div class="list" v-for="list in cardLists" v-bind:key="list.status">
       <p class="list-title">{{list.name}}</p>
-      <draggable :list="list.todos" group="todos" @change="log">
+      <draggable :list="list.todos" group="todos" @change="actionMoveTodo">
         <div class="card" v-for="todo in list.todos" :key="todo.id" @click="actionUpdateTodo(todo)">
           <p class="card-subject">{{todo.subject}}</p>
           <p class="card-body">{{todo.body}}</p>
@@ -140,11 +140,34 @@ export default {
         this.actionCloseModal()
       })
     },
-    log(evt) {
-      console.log('todo moved', evt)
-      console.log(this.cardLists[0])
-      console.log(this.cardLists[1])
-      console.log(this.cardLists[2])
+    actionMoveTodo(evt) {
+      let list
+      if (evt.removed != null) { // 다른 리스트로 이동한 경우
+        loop: for (let i = 0; i <= 2; i++) {
+          list = this.cardLists[i];
+          for (let j = 0; j < list.todos.length; j++) {
+            if (list.todos[j].status !== list.status) {
+              break loop
+            }
+          }
+        }
+      } else if (evt.moved != null) { // 같은 리스트에서 위치만 이동한 경우
+        let status = evt.element.status
+        list = this.cardLists[status]
+      } else {
+        return
+      }
+
+      let positions = []
+      for (let i = 0; i < list.todos.length; i++) {
+        positions.push(
+            {
+              position: i,
+              id: list.todos[i].id
+            }
+        )
+      }
+      todoService.updatePositions(list.status, positions)
     },
     loadTodos() {
       if (this.folder == null || this.folder.id === 0) {
@@ -191,7 +214,7 @@ export default {
         list = this.cardLists[2].todos
       }
       if (list.length === 0) {
-        return -1
+        return 0
       }
       let last = list[list.length - 1]
       return last.position
